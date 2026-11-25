@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusCrew</title>
+<style>
+  :root{
+    --red:#E11D2A; --red2:#FF4D57; --red-d:#B5121D; --red-l:#FFEEF0; --ink:#0F1222; --ink2:#454B5E; --mute:#8B91A3;
+    --line:#E9EBF2; --bg:#F5F6FB; --card:#FFFFFF; --green:#12A150; --green-l:#E5F7EC; --amber:#D97706; --amber-l:#FFF5E1;
+    --violet:#7C3AED; --blue:#2563EB;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06); --shadow-h:0 2px 4px rgba(16,24,40,.06), 0 16px 36px rgba(16,24,40,.12);
+    --r:18px; --grad:linear-gradient(135deg,#FF4D57 0%,#E11D2A 50%,#A30F1A 100%);
+  }
+  body.dark{--ink:#F1F2F7;--ink2:#C3C7D4;--mute:#8D93A6;--line:#272B3B;--bg:#0D0F19;--card:#151826;--red-l:#3A1218;--green-l:#0F2E1E;--amber-l:#33240A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Inter,Roboto,Arial,sans-serif;color:var(--ink);font-size:14px;
+    background:var(--bg);background-image:radial-gradient(900px 500px at 100% -10%,rgba(225,29,42,.08),transparent 60%),radial-gradient(800px 500px at -10% 30%,rgba(124,58,237,.06),transparent 60%);background-attachment:fixed;transition:background .3s,color .3s}
+  button{font-family:inherit}
+  ::selection{background:var(--red);color:#fff}
+  /* top bar */
+  .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid var(--line)}
+  .top-in{max-width:1260px;margin:auto;display:flex;align-items:center;gap:22px;padding:12px 24px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.4px;cursor:pointer}
+  .logo-mark{width:36px;height:36px;border-radius:11px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:18px;box-shadow:0 6px 16px rgba(225,29,42,.35)}
+  .nav{display:flex;gap:2px;flex:1}
+  .nav button{position:relative;border:0;background:none;padding:9px 14px;border-radius:11px;color:var(--ink2);font-size:14px;font-weight:550;cursor:pointer;transition:.2s}
+  .nav button:hover{background:var(--red-l);color:var(--red)}
+  .nav button.active{color:var(--red);font-weight:700}
+  .nav button.active::after{content:"";position:absolute;left:14px;right:14px;bottom:2px;height:3px;border-radius:3px;background:var(--grad)}
+  .icon-btn{position:relative;border:1px solid var(--line);background:var(--card);color:var(--ink);width:40px;height:40px;border-radius:12px;cursor:pointer;font-size:17px;transition:.2s}
+  .icon-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .badge{position:absolute;top:-6px;right:-6px;background:var(--grad);color:#fff;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:10px;display:none;place-items:center;padding:0 5px;box-shadow:0 0 0 2px var(--card);animation:pop .4s}
+  @keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+  main{max-width:1260px;margin:auto;padding:28px 24px 70px}
+  .page{display:none} .page.active{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:30px;letter-spacing:-.8px;margin:0 0 6px;font-weight:800} h2{font-size:19px;margin:0 0 14px;letter-spacing:-.3px} h3{font-size:15px;margin:0 0 10px}
+  .sub{color:var(--mute);margin:0 0 24px;font-size:14.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;transition:transform .2s,box-shadow .2s,border-color .2s}
+  .lift:hover{transform:translateY(-3px);box-shadow:var(--shadow-h)}
+  .btn{border:0;background:var(--grad);color:#fff;font-weight:650;padding:10px 17px;border-radius:12px;cursor:pointer;font-size:14px;transition:.2s;display:inline-flex;align-items:center;gap:7px;box-shadow:0 6px 16px rgba(225,29,42,.25)}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(225,29,42,.35)} .btn:active{transform:none}
+  .btn:disabled{background:#C9CCD5;box-shadow:none;cursor:default;transform:none}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none} .btn.ghost:hover{border-color:var(--red);color:var(--red)}
+  .btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+  .btn.done{background:var(--green-l);color:var(--green);box-shadow:none;cursor:default}
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:color-mix(in srgb,var(--mute) 14%,transparent);color:var(--ink2);margin:2px 4px 2px 0}
+  .chip.red{background:var(--red-l);color:var(--red)} .chip.green{background:var(--green-l);color:var(--green)} .chip.amber{background:var(--amber-l);color:var(--amber)}
+  .muted{color:var(--mute);font-size:13px}
+  .av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:750;flex:none;font-size:15px;box-shadow:0 0 0 3px var(--card),0 4px 10px rgba(0,0,0,.12)}
+  .sec-hd{display:flex;justify-content:space-between;align-items:end;margin:34px 0 14px} .sec-hd h2{margin:0}
+  .link{color:var(--red);cursor:pointer;font-size:13px;font-weight:650}
+  /* home */
+  .hero{position:relative;overflow:hidden;background:var(--grad);color:#fff;border-radius:26px;padding:40px 42px;display:grid;grid-template-columns:1.25fr 1fr;gap:34px;align-items:center;box-shadow:0 20px 50px rgba(225,29,42,.28)}
+  .hero::before,.hero::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.08)}
+  .hero::before{width:380px;height:380px;right:-90px;top:-150px} .hero::after{width:240px;height:240px;left:38%;bottom:-150px}
+  .hero>*{position:relative}
+  .pill{display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);padding:5px 12px;border-radius:20px;font-size:12.5px;font-weight:600;margin-bottom:14px}
+  .hero h1{font-size:40px;line-height:1.08;color:#fff;letter-spacing:-1.2px} .hero p{opacity:.92;font-size:16.5px;line-height:1.55;margin:12px 0 24px;max-width:560px}
+  .hero .btn{background:#fff;color:var(--red);box-shadow:0 8px 20px rgba(0,0,0,.15)} .hero .btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.55)}
+  .hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .hs{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 18px;backdrop-filter:blur(6px)} .hs b{font-size:32px;display:block;letter-spacing:-1px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .step{display:flex;gap:14px;align-items:flex-start;cursor:pointer}
+  .step .n{width:46px;height:46px;border-radius:14px;background:var(--red-l);display:grid;place-items:center;font-size:22px;flex:none}
+  .step p{color:var(--ink2);margin:4px 0 0;line-height:1.5}
+  .talent{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .tal{text-align:center;cursor:pointer} .tal .av{margin:0 auto 10px;width:58px;height:58px;font-size:18px}
+  .countdown{display:flex;align-items:center;gap:22px;background:linear-gradient(120deg,#1B1F35,#2A2F4F);color:#fff;border:0}
+  .cd{display:flex;gap:10px} .cd div{background:rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;text-align:center;min-width:62px} .cd b{font-size:24px;display:block}
+  /* find */
+  .layout{display:grid;grid-template-columns:310px 1fr 300px;gap:20px;align-items:start}
+  .side{position:sticky;top:88px}
+  .opt-group{margin-bottom:16px} .opt-group h4{margin:0 0 9px;font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--mute)}
+  .toggle{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:20px;margin:0 6px 8px 0;cursor:pointer;font-size:13px;user-select:none;transition:.15s;background:var(--card);color:var(--ink2);font-weight:550}
+  .toggle:hover{border-color:var(--red)} .toggle.on{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 4px 10px rgba(225,29,42,.25)}
+  .need{background:var(--amber-l);color:var(--amber);border-radius:12px;padding:11px 13px;font-size:13px;margin-top:12px;font-weight:500}
+  .cand{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:18px;margin-bottom:12px;animation:fade .35s ease both}
+  .cand:hover{border-color:color-mix(in srgb,var(--red) 35%,var(--line));box-shadow:var(--shadow-h)}
+  .cand .name{font-weight:700;font-size:15.5px} .cand .meta{color:var(--mute);font-size:12.5px;margin:3px 0 7px}
+  .ring{--p:0;width:68px;height:68px;border-radius:50%;background:conic-gradient(var(--green) calc(var(--p)*1%),color-mix(in srgb,var(--mute) 18%,transparent) 0);display:grid;place-items:center;margin:0 auto;transition:--p 1s}
+  .ring span{width:54px;height:54px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--green)}
+  @property --p{syntax:'<number>';inherits:false;initial-value:0}
+  .actions{display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:124px}
+  .why{display:none;grid-column:1/-1;border-top:1px dashed var(--line);padding-top:12px} .cand.open .why{display:block}
+  .bars{display:grid;grid-template-columns:160px 1fr 44px;gap:7px 12px;font-size:12.5px;color:var(--ink2);align-items:center;max-width:540px}
+  .bar{height:8px;background:color-mix(in srgb,var(--mute) 16%,transparent);border-radius:6px;overflow:hidden} .bar i{display:block;height:100%;background:var(--grad);border-radius:6px}
+  .skel{height:118px;border-radius:var(--r);margin-bottom:12px;background:linear-gradient(90deg,var(--card) 0%,color-mix(in srgb,var(--mute) 12%,var(--card)) 50%,var(--card) 100%);background-size:200% 100%;animation:shim 1s linear infinite;border:1px solid var(--line)}
+  @keyframes shim{to{background-position:-200% 0}}
+  .myteam .mem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);animation:fade .4s} .myteam .mem:last-child{border:0}
+  .myteam .av{width:36px;height:36px;font-size:12px}
+  .cov{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0 4px}
+  .progress{height:9px;background:color-mix(in srgb,var(--mute) 16%,transparent);border-radius:6px;overflow:hidden;margin:7px 0 2px} .progress i{display:block;height:100%;background:linear-gradient(90deg,#22C55E,#12A150);transition:width .6s ease}
+  /* auto */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+  .kpi b{font-size:34px;display:block;letter-spacing:-1px} .kpi.win b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent} .kpi.lose b{color:#9AA0AE}
+  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .team{padding:15px;animation:fade .35s both} .team.full{border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+  .team .hd{display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px}
+  .team .row{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:var(--ink2)}
+  .switch{display:inline-flex;background:color-mix(in srgb,var(--mute) 14%,transparent);border-radius:12px;padding:4px;margin-bottom:14px}
+  .switch button{border:0;background:none;padding:7px 15px;border-radius:9px;cursor:pointer;font-weight:650;color:var(--ink2)}
+  .switch button.on{background:var(--card);box-shadow:var(--shadow);color:var(--ink)}
+  .note{font-size:13px;color:var(--ink2);background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;margin-bottom:18px}
+  /* services */
+  .svc-top{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .search{flex:1;min-width:240px;padding:12px 16px 12px 42px;border:1px solid var(--line);border-radius:14px;font-size:14.5px;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%238B91A3' stroke-width='2'%3E%3Ccircle cx='8' cy='8' r='6'/%3E%3Cpath d='m13 13 4 4'/%3E%3C/svg%3E") 14px 50% no-repeat;color:var(--ink);outline:none;transition:.2s}
+  .search:focus{border-color:var(--red);box-shadow:0 0 0 4px var(--red-l)}
+  .svcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:18px}
+  .svc{padding:0;overflow:hidden;display:flex;flex-direction:column}
+  .svc .cover{height:96px;display:grid;place-items:center;font-size:42px;position:relative}
+  .svc .cover .price{position:absolute;right:12px;top:12px;background:var(--card);color:var(--ink);font-weight:750;font-size:12.5px;padding:4px 10px;border-radius:20px;box-shadow:var(--shadow)}
+  .svc .body{padding:15px 17px;display:flex;flex-direction:column;gap:7px;flex:1}
+  .svc .t{font-weight:700;font-size:16px} .svc .d{color:var(--ink2);font-size:13px;line-height:1.45}
+  .svc .by{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:2px} .svc .by .av{width:28px;height:28px;font-size:11px;box-shadow:none}
+  .svc .foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:11px;border-top:1px solid var(--line)}
+  .stars{color:#F5A400;font-size:13px}
+  /* events */
+  .events{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px}
+  .ev{padding:0;overflow:hidden}
+  .ev .banner{height:84px;padding:16px 20px;color:#fff;display:flex;justify-content:space-between;align-items:flex-start}
+  .ev .date{background:rgba(255,255,255,.95);color:var(--red);border-radius:12px;text-align:center;padding:6px 12px;font-weight:800;line-height:1.1}
+  .ev .date b{display:block;font-size:22px} .ev .date small{font-size:11px}
+  .ev .body{padding:16px 20px}
+  /* profile */
+  .prof{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+  .prof-hd{text-align:center} .prof-hd .av{width:92px;height:92px;font-size:30px;margin:0 auto 12px}
+  .rep{font-size:42px;font-weight:800;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .skill{display:grid;grid-template-columns:150px 1fr 70px;gap:12px;align-items:center;margin-bottom:12px;font-weight:600}
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .bdg{text-align:center;padding:16px 10px} .bdg .e{font-size:30px} .bdg.locked{opacity:.4;filter:grayscale(1)}
+  .timeline .it{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)} .timeline .it:last-child{border:0}
+  .timeline .dotc{width:30px;height:30px;border-radius:50%;background:var(--red-l);display:grid;place-items:center;flex:none}
+  /* drawer & modals */
+  .scrim{position:fixed;inset:0;background:rgba(10,12,24,.45);backdrop-filter:blur(2px);display:none;z-index:40} .scrim.show{display:block}
+  .drawer{position:fixed;top:0;right:0;transform:translateX(105%);width:760px;max-width:100vw;height:100vh;background:var(--card);z-index:50;transition:transform .35s cubic-bezier(.2,.8,.2,1);display:grid;grid-template-columns:260px 1fr;box-shadow:-20px 0 60px rgba(0,0,0,.2)}
+  .drawer.show{transform:none}
+  .convos{border-right:1px solid var(--line);overflow:auto} .convos h3{padding:20px 18px 10px;margin:0;font-size:18px}
+  .cv{display:flex;gap:10px;padding:11px 16px;cursor:pointer;align-items:center;border-left:3px solid transparent;transition:.15s}
+  .cv:hover{background:color-mix(in srgb,var(--mute) 8%,transparent)} .cv.on{background:var(--red-l);border-left-color:var(--red)}
+  .cv .av{width:40px;height:40px;font-size:13px;box-shadow:none} .cv .nm{font-weight:650;font-size:13.5px} .cv .last{color:var(--mute);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  .cv .dot{width:9px;height:9px;border-radius:50%;background:var(--red);margin-left:auto;flex:none}
+  .online{width:10px;height:10px;border-radius:50%;background:#22C55E;display:inline-block;margin-right:4px}
+  .chat{display:flex;flex-direction:column;height:100vh}
+  .chat-hd{display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)} .chat-hd .av{width:42px;height:42px;font-size:14px;box-shadow:none}
+  .msgs{flex:1;overflow:auto;padding:20px;background:color-mix(in srgb,var(--mute) 5%,var(--card));display:flex;flex-direction:column;gap:9px}
+  .msg{max-width:72%;padding:10px 14px;border-radius:18px;line-height:1.45;font-size:14px;animation:fade .25s}
+  .msg.them{background:var(--card);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:5px}
+  .msg.me{background:var(--grad);color:#fff;align-self:flex-end;border-bottom-right-radius:5px;box-shadow:0 4px 12px rgba(225,29,42,.25)}
+  .msg small{display:block;opacity:.65;font-size:10.5px;margin-top:3px}
+  .typing{color:var(--mute);font-size:12px;font-style:italic;padding:0 20px 6px;height:18px}
+  .compose{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+  .compose input{flex:1;padding:12px 15px;border:1px solid var(--line);border-radius:14px;font-size:14px;background:var(--card);color:var(--ink);outline:none}
+  .compose input:focus{border-color:var(--red);box-shadow:0 0 0 4px var(--red-l)}
+  .quick{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
+  .quick span{font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:16px;cursor:pointer;color:var(--ink2);transition:.15s} .quick span:hover{border-color:var(--red);color:var(--red)}
+  .empty{display:grid;place-items:center;height:100%;color:var(--mute);text-align:center;padding:30px}
+  .x{margin-left:auto;border:0;background:none;font-size:24px;cursor:pointer;color:var(--mute)}
+  .modal{position:fixed;inset:0;display:none;place-items:center;z-index:60;background:rgba(10,12,24,.5);backdrop-filter:blur(3px)} .modal.show{display:grid}
+  .modal .card{width:470px;max-width:92vw;padding:26px;animation:fade .25s}
+  .field{margin-bottom:13px} .field label{display:block;font-size:12.5px;color:var(--ink2);margin-bottom:6px;font-weight:650}
+  .field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:14px;font-family:inherit;background:var(--card);color:var(--ink);outline:none}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--red);box-shadow:0 0 0 4px var(--red-l)}
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F1222;color:#fff;padding:13px 22px;border-radius:14px;opacity:0;transition:.3s;z-index:70;font-weight:550;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:80;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+  @media (max-width:1100px){.layout,.prof{grid-template-columns:1fr}.side{position:static}.hero{grid-template-columns:1fr}.steps,.talent,.kpis,.badges{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <div class="logo" onclick="go('home')"><div class="logo-mark">⚡</div>CampusCrew</div>
+  <div class="nav" id="nav">
+    <button data-p="home" class="active">Home</button>
+    <button data-p="find">Find Teammates</button>
+    <button data-p="auto">Auto-Build Teams</button>
+    <button data-p="services">Skill Services</button>
+    <button data-p="events">Events</button>
+    <button data-p="profile">My Profile</button>
+  </div>
+  <button class="icon-btn" title="Dark mode" onclick="document.body.classList.toggle('dark');this.textContent=document.body.classList.contains('dark')?'☀️':'🌙'">🌙</button>
+  <button class="icon-btn" title="Messages" onclick="openChat()">💬<span class="badge" id="badge"></span></button>
+  <div class="av" style="width:38px;height:38px;font-size:12px;background:var(--grad);cursor:pointer" onclick="go('profile')">YOU</div>
+</div></div>
+
+<main>
+  <!-- HOME -->
+  <section class="page active" id="home">
+    <div class="hero">
+      <div>
+        <div class="pill">⚡ Built for students, by students</div>
+        <h1>Find your crew.<br>Share your skills.<br>Grow together.</h1>
+        <p>Form balanced hackathon teams, discover campus talent like designers and photographers, and build a skill profile that recruiters trust.</p>
+        <button class="btn" onclick="go('find')">Find teammates →</button>
+        <button class="btn ghost" onclick="go('services')">Browse services</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hs"><b class="count" data-to="60">0</b>students on CampusCrew</div>
+        <div class="hs"><b class="count" id="hsServices" data-to="7">0</b>skill services listed</div>
+        <div class="hs"><b class="count" data-to="4">0</b>upcoming events</div>
+        <div class="hs"><b class="count" data-to="6">0</b>skill roles matched</div>
+      </div>
+    </div>
+
+    <div class="sec-hd"><h2>How it works</h2></div>
+    <div class="steps">
+      <div class="card lift step" onclick="go('profile')"><div class="n">🧑‍💻</div><div><h3>1. Build your skill profile</h3><p>Add your skills, interests and free days. Earn badges as you collaborate.</p></div></div>
+      <div class="card lift step" onclick="go('find')"><div class="n">🤝</div><div><h3>2. Get matched</h3><p>We rank students who bring the skills your team is missing – with a clear match %.</p></div></div>
+      <div class="card lift step" onclick="go('services')"><div class="n">🚀</div><div><h3>3. Build & book</h3><p>Chat, form your team, register for events – or book a designer or photographer.</p></div></div>
+    </div>
+
+    <div class="sec-hd"><h2>Top talent on campus</h2><span class="link" onclick="go('find')">See all →</span></div>
+    <div class="talent" id="talent"></div>
+
+    <div class="sec-hd"><h2>Next hackathon</h2><span class="link" onclick="go('events')">All events →</span></div>
+    <div class="card countdown">
+      <div style="font-size:42px">🏆</div>
+      <div style="flex:1"><h2 style="margin:0 0 4px;color:#fff">CampusHack 2026 – internal round</h2><div style="opacity:.75">Team of 6 · ideal mix: Frontend, Backend, Design, Pitch</div></div>
+      <div class="cd" id="cd"></div>
+      <button class="btn" onclick="go('find')">Find my team</button>
+    </div>
+    <p class="muted" style="margin-top:22px">Demo build · 60 sample student profiles (synthetic data) · all matching runs live in your browser.</p>
+  </section>
+
+  <!-- FIND -->
+  <section class="page" id="find">
+    <h1>Find Teammates</h1>
+    <p class="sub">Match score = 40% new skills · 25% shared interests · 20% common free days · 15% rating</p>
+    <div class="layout">
+      <div class="card side">
+        <div class="opt-group"><h4>Skills your team already has</h4><div id="optSkills"></div></div>
+        <div class="opt-group"><h4>Your interests</h4><div id="optInts"></div></div>
+        <div class="opt-group"><h4>Days you're free</h4><div id="optDays"></div></div>
+        <button class="btn" style="width:100%;justify-content:center" onclick="findMates(true)">🔍 Find best matches</button>
+        <div class="need" id="need"></div>
+      </div>
+      <div id="results"></div>
+      <div class="card side myteam">
+        <h3>My Team <span class="muted" id="teamCount">(1/6)</span></h3>
+        <div id="teamList"></div>
+        <div class="muted" style="margin-top:12px;display:flex;justify-content:space-between"><span>Role coverage</span><b id="covPct">0%</b></div>
+        <div class="progress"><i id="covBar" style="width:0"></i></div>
+        <div class="cov" id="covChips"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTO -->
+  <section class="page" id="auto">
+    <h1>Auto-Build Teams</h1>
+    <p class="sub">Forms teams of 6 from 60 sample students and compares random grouping (like friend groups) with CampusCrew matching. Core roles: Frontend, Backend, UI/UX Design, Pitch.</p>
+    <button class="btn" onclick="runAuto()">⚙️ Build teams for this batch</button>
+    <button class="btn ghost" onclick="newBatch()">🔄 New batch of students</button>
+    <button class="btn ghost" onclick="runMany()">📊 Average over 20 batches</button>
+    <div class="kpis" id="kpis"></div>
+    <div id="autoNote"></div>
+    <div class="switch" id="sw" style="display:none"><button class="on" data-v="crew">CampusCrew teams</button><button data-v="rand">Random teams</button></div>
+    <div class="teams" id="teamsGrid"></div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="page" id="services">
+    <h1>Skill Services</h1>
+    <p class="sub">Talent from your own campus – book it, or list your own skill.</p>
+    <div class="svc-top">
+      <input class="search" id="q" placeholder="Search photography, design, tutoring…" oninput="renderSvcs()">
+      <button class="btn" onclick="openModal('listModal')">＋ List your service</button>
+    </div>
+    <div id="catChips" style="margin-bottom:18px"></div>
+    <div class="svcs" id="svcs"></div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="page" id="events">
+    <h1>Events & Hackathons</h1>
+    <p class="sub">Sample events posted by clubs.</p>
+    <div class="events" id="evs"></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="page" id="profile">
+    <h1>My Profile</h1>
+    <p class="sub">Your skills, reputation and badges grow with every team and service.</p>
+    <div class="prof">
+      <div class="card prof-hd">
+        <div class="av" style="background:var(--grad)">YOU</div>
+        <h2 style="margin:0">Your Name</h2>
+        <div class="muted">CSE · 3rd Year · JECRC University</div>
+        <div style="margin:14px 0 4px" class="muted">Reputation</div>
+        <div class="rep">4.7</div><div class="stars">★★★★★</div>
+        <div style="display:flex;justify-content:space-around;margin-top:16px">
+          <div><b style="font-size:20px">3</b><div class="muted">Hackathons</div></div>
+          <div><b style="font-size:20px" id="pTeam">1</b><div class="muted">Teammates</div></div>
+          <div><b style="font-size:20px">2</b><div class="muted">Services</div></div>
+        </div>
+        <div style="margin-top:16px"><span class="chip red">HealthTech</span><span class="chip red">Smart Campus</span></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:18px"><h2>Skills</h2><div id="skillBars"></div></div>
+        <div class="card" style="margin-bottom:18px"><h2>Badges</h2><div class="badges">
+          <div class="card bdg lift"><div class="e">🚀</div><b>First Hackathon</b><div class="muted">Joined a team</div></div>
+          <div class="card bdg lift"><div class="e">🤝</div><b>Team Player</b><div class="muted">Rated 4.5+ by teammates</div></div>
+          <div class="card bdg lift"><div class="e">🎓</div><b>Mentor</b><div class="muted">Helped 5 juniors</div></div>
+          <div class="card bdg locked"><div class="e">🏆</div><b>Winner</b><div class="muted">Win a hackathon</div></div>
+        </div></div>
+        <div class="card timeline"><h2>Recent activity</h2>
+          <div class="it"><div class="dotc">🏆</div><div><b>Registered for CampusHack 2026</b><div class="muted">2 days ago</div></div></div>
+          <div class="it"><div class="dotc">⭐</div><div><b>Received a 5★ review for DSA Tutoring</b><div class="muted">“Explained recursion really well!” · 5 days ago</div></div></div>
+          <div class="it"><div class="dotc">🎨</div><div><b>Booked Poster Design from Ananya</b><div class="muted">1 week ago</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" onclick="closeAll()"></div>
+<div class="drawer" id="drawer">
+  <div class="convos"><h3>Messages</h3><div id="cvList"></div></div>
+  <div class="chat" id="chat"><div class="empty">💬<br>Select a conversation, or press “Message” on any student or service.</div></div>
+</div>
+
+<div class="modal" id="listModal"><div class="card">
+  <div style="display:flex;align-items:center"><h2 style="margin:0">List your service</h2><button class="x" onclick="closeAll()">×</button></div>
+  <p class="muted">Integrity policy: tutoring & proofreading welcome – writing assignments for others is not allowed.</p>
+  <div class="field"><label>Service title</label><input id="fTitle" placeholder="e.g. Event Photography"></div>
+  <div class="field"><label>Category</label><select id="fCat"></select></div>
+  <div class="field"><label>Your name & branch</label><input id="fName" placeholder="e.g. Riya (CSE, 3rd yr)"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="field"><label>Pricing</label><select id="fType" onchange="$('fAmt').disabled=['Free','Skill swap'].includes(this.value)"><option>Negotiable</option><option>Starting from</option><option>Fixed</option><option>Free</option><option>Skill swap</option></select></div>
+    <div class="field"><label>Your price (₹)</label><input id="fAmt" type="number" min="0" placeholder="e.g. 200"></div>
+  </div>
+  <div class="field"><label>Description</label><textarea id="fDesc" rows="2"></textarea></div>
+  <button class="btn" onclick="addService()">Publish service</button>
+</div></div>
+
+<div class="modal" id="bookModal"><div class="card">
+  <div style="display:flex;align-items:center"><h2 style="margin:0" id="bTitle">Book</h2><button class="x" onclick="closeAll()">×</button></div>
+  <p class="muted" id="bBy"></p>
+  <div class="field"><label>Date needed</label><input type="date" id="bDate"></div>
+  <div class="field" id="offerField"><label>Your offer (₹) – the provider can accept or counter</label><input type="number" min="0" id="bOffer"></div>
+  <div class="field"><label>Details for the provider</label><textarea id="bNote" rows="3" placeholder="e.g. Need photos for our club event, 2 hours"></textarea></div>
+  <button class="btn" onclick="confirmBooking()">Send booking request</button>
+</div></div>
+
+<div class="modal" id="profModal"><div class="card" id="profBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= data & algorithm (same as matcher.py) ================= */
+const ROLES=["Frontend","Backend","ML/AI","UI/UX Design","Pitch/Presentation","Research/Domain"];
+const CORE=["Frontend","Backend","UI/UX Design","Pitch/Presentation"];
+const INTERESTS=["HealthTech","EdTech","FinTech","AgriTech","Sustainability","Smart Campus"];
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const WEIGHTS=[30,25,20,8,7,10];
+const NAMES=["Aarav","Riya","Kabir","Ananya","Vivaan","Isha","Arjun","Meera","Rohan","Sana","Dev","Tanvi","Yash","Kavya","Aditya","Nisha","Kunal","Pooja","Harsh","Diya","Manav","Sneha","Rahul","Aisha","Varun","Neha","Krish","Simran","Ishaan","Priya"];
+const BRANCHES=["CSE","IT","ECE","AI&DS","BBA","B.Des"];
+const GRADS=["linear-gradient(135deg,#FF6B6B,#E11D2A)","linear-gradient(135deg,#60A5FA,#2563EB)","linear-gradient(135deg,#34D399,#059669)","linear-gradient(135deg,#A78BFA,#7C3AED)","linear-gradient(135deg,#F472B6,#DB2777)","linear-gradient(135deg,#FDBA74,#EA580C)","linear-gradient(135deg,#22D3EE,#0891B2)","linear-gradient(135deg,#9CA3AF,#4B5563)"];
+function rng(seed){let s=seed>>>0;return()=>((s=(s*1664525+1013904223)>>>0)/4294967296)}
+function pickW(r,it,w){let t=w.reduce((a,b)=>a+b),x=r()*t;for(let i=0;i<it.length;i++){if((x-=w[i])<0)return it[i]}return it[it.length-1]}
+function sample(r,arr,k){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,k)}
+function makeStudents(n,seed){const r=rng(seed),out=[];for(let i=0;i<n;i++){const sk=new Set([pickW(r,ROLES,WEIGHTS)]);if(r()<.4)sk.add(pickW(r,ROLES,WEIGHTS));
+  out.push({id:i,name:NAMES[i%NAMES.length]+" "+String.fromCharCode(65+Math.floor(i/NAMES.length))+".",branch:BRANCHES[Math.floor(r()*BRANCHES.length)],year:1+Math.floor(r()*4),
+  skills:sk,interests:new Set(sample(r,INTERESTS,2)),slots:new Set(sample(r,DAYS,3)),rating:Math.round((3+r()*2)*10)/10,color:GRADS[i%GRADS.length]})}return out}
+const union=s=>s.reduce((a,x)=>{x.forEach(v=>a.add(v));return a},new Set());
+const jac=(a,b)=>{const u=new Set([...a,...b]);if(!u.size)return 0;let i=0;a.forEach(x=>{if(b.has(x))i++});return i/u.size};
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+function parts(team,c){const cov=union(team.map(m=>m.skills));const nr=[...c.skills].filter(s=>!cov.has(s)).length/c.skills.size;
+  const it=mean(team.map(m=>jac(c.interests,m.interests))),av=mean(team.map(m=>jac(c.slots,m.slots)));
+  return{nr,it,av,rt:c.rating/5,total:.40*nr+.25*it+.20*av+.15*c.rating/5}}
+const score=(t,c)=>t.length?parts(t,c).total:c.rating;
+function buildTeams(students,size){const teams=Array.from({length:Math.floor(students.length/size)},()=>[]);const pool=students.slice();
+  const cnt=Object.fromEntries(CORE.map(r=>[r,pool.filter(s=>s.skills.has(r)).length]));
+  for(const role of CORE.slice().sort((a,b)=>cnt[a]-cnt[b])){for(const t of teams){if(t.some(m=>m.skills.has(role)))continue;
+    const c=pool.filter(s=>s.skills.has(role));if(!c.length)break;const best=c.reduce((b,x)=>score(t,x)>score(t,b)?x:b);t.push(best);pool.splice(pool.indexOf(best),1)}}
+  for(const t of teams){while(t.length<size&&pool.length){const best=pool.reduce((b,x)=>score(t,x)>score(t,b)?x:b);t.push(best);pool.splice(pool.indexOf(best),1)}}
+  return teams}
+function randomTeams(st,size,seed){const s=sample(rng(seed*7+3),st,st.length),t=[];for(let i=0;i+size<=s.length;i+=size)t.push(s.slice(i,i+size));return t}
+function evaluate(teams){const cov=teams.map(t=>union(t.map(m=>m.skills)).size);const full=teams.map(t=>{const u=union(t.map(m=>m.skills));return CORE.every(r=>u.has(r))});
+  return{avg:mean(cov),pct:100*full.filter(Boolean).length/full.length}}
+let seed=7,students=makeStudents(60,seed);
+
+/* ================= helpers ================= */
+const $=id=>document.getElementById(id);
+const ini=n=>n.split(/[\s(]/).filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const avatar=(name,bg,size)=>`<div class="av" style="background:${bg}${size?`;width:${size}px;height:${size}px;font-size:${size*.34}px`:""}">${ini(name)}</div>`;
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2400)}
+function go(p){document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.p===p));document.querySelectorAll(".page").forEach(s=>s.classList.toggle("active",s.id===p));window.scrollTo(0,0);if(p==="profile")renderProfile()}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>go(b.dataset.p));
+function openModal(id){$(id).classList.add("show")}
+function closeAll(){document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));$("drawer").classList.remove("show");$("scrim").classList.remove("show")}
+document.querySelectorAll(".modal").forEach(m=>m.onclick=e=>{if(e.target===m)closeAll()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeAll()});
+function confetti(){const c=["#E11D2A","#FF4D57","#F5A400","#12A150","#2563EB","#7C3AED"];for(let i=0;i<70;i++){const d=document.createElement("div");d.className="confetti";
+  d.style.left=Math.random()*100+"vw";d.style.background=c[i%c.length];d.style.animationDuration=(1.6+Math.random()*1.6)+"s";d.style.animationDelay=Math.random()*.4+"s";d.style.borderRadius=Math.random()<.5?"50%":"2px";
+  document.body.appendChild(d);setTimeout(()=>d.remove(),3800)}}
+function countUp(){document.querySelectorAll(".count").forEach(el=>{const to=+el.dataset.to;let v=0;const st=Math.max(1,Math.ceil(to/30));const iv=setInterval(()=>{v=Math.min(to,v+st);el.textContent=v;if(v>=to)clearInterval(iv)},28)})}
+
+/* ================= home ================= */
+function renderHome(){const top=students.slice().sort((a,b)=>b.rating-a.rating).slice(0,4);
+  $("talent").innerHTML=top.map(s=>`<div class="card lift tal" onclick="profile(${s.id})">${avatar(s.name,s.color)}<b>${s.name}</b><div class="muted">${s.branch} · Year ${s.year}</div>
+    <div style="margin:8px 0">${[...s.skills].map(x=>`<span class="chip red">${x}</span>`).join("")}</div><span class="stars">★</span> <b>${s.rating}</b></div>`).join("");
+  const target=new Date();target.setDate(target.getDate()+23);target.setHours(9,0,0,0);
+  const tick=()=>{let d=Math.max(0,target-new Date());const D=Math.floor(d/864e5),H=Math.floor(d/36e5)%24,M=Math.floor(d/6e4)%60,S=Math.floor(d/1e3)%60;
+    $("cd").innerHTML=[[D,"days"],[H,"hrs"],[M,"min"],[S,"sec"]].map(([v,l])=>`<div><b>${String(v).padStart(2,"0")}</b><small>${l}</small></div>`).join("")};tick();setInterval(tick,1000)}
+
+/* ================= find ================= */
+function toggles(el,items,on){$(el).innerHTML=items.map(x=>`<span class="toggle ${on.includes(x)?"on":""}" data-v="${x}">${x}</span>`).join("");
+  $(el).querySelectorAll(".toggle").forEach(t=>t.onclick=()=>{t.classList.toggle("on");renderTeam()})}
+const sel=el=>new Set([...$(el).querySelectorAll(".toggle.on")].map(t=>t.dataset.v));
+toggles("optSkills",ROLES,["Frontend","Backend","ML/AI"]);toggles("optInts",INTERESTS,["HealthTech","Smart Campus"]);toggles("optDays",DAYS,["Wed","Sat","Sun"]);
+let myTeam=[];
+function me(){return{skills:union([sel("optSkills"),...myTeam.map(m=>m.skills)]),interests:sel("optInts"),slots:sel("optDays")}}
+function findMates(anim){if(!sel("optSkills").size){toast("Pick at least one skill your team has");return}
+  if(anim){$("results").innerHTML=`<h2>Finding the best matches…</h2>`+'<div class="skel"></div>'.repeat(4);setTimeout(()=>findMates(false),650);return}
+  const m=me();const miss=ROLES.filter(r=>!m.skills.has(r));$("need").innerHTML=miss.length?`⚠️ Your team is missing <b>${miss.join(", ")}</b>`:"🎉 Your team covers every role!";
+  const ranked=students.filter(s=>!myTeam.includes(s)).map(c=>({c,p:parts([m],c)})).sort((a,b)=>b.p.total-a.p.total).slice(0,8);
+  $("results").innerHTML=`<h2>Top matches for your team</h2>`+ranked.map(({c,p},i)=>`
+   <div class="card cand" id="cand${c.id}" style="animation-delay:${i*.05}s">
+     ${avatar(c.name,c.color)}
+     <div>
+       <div class="name">${c.name} ${i===0?'<span class="chip green">⭐ Best match</span>':""}</div>
+       <div class="meta"><span class="online"></span>${c.branch} · Year ${c.year} · <span class="stars">★</span> ${c.rating} · free ${[...c.slots].join(", ")}</div>
+       ${[...c.skills].map(s=>m.skills.has(s)?`<span class="chip">${s}</span>`:`<span class="chip green">＋ ${s}</span>`).join("")}
+       ${[...c.interests].map(s=>`<span class="chip red">${s}</span>`).join("")}
+       <div style="margin-top:7px"><span class="link" onclick="this.closest('.cand').classList.toggle('open')">Why this match? ▾</span></div>
+     </div>
+     <div style="display:flex;gap:16px;align-items:center">
+       <div class="ring" data-p="${Math.round(p.total*100)}"><span>${Math.round(p.total*100)}%</span></div>
+       <div class="actions">
+         <button class="btn sm" onclick="invite(${c.id},this)">Invite to team</button>
+         <button class="btn ghost sm" onclick="openChat('s${c.id}')">💬 Message</button>
+         <button class="btn ghost sm" onclick="profile(${c.id})">View profile</button>
+       </div>
+     </div>
+     <div class="why"><div class="bars">
+       <span>Brings new skills (40%)</span><div class="bar"><i style="width:${p.nr*100}%"></i></div><b>${Math.round(p.nr*100)}%</b>
+       <span>Shared interests (25%)</span><div class="bar"><i style="width:${p.it*100}%"></i></div><b>${Math.round(p.it*100)}%</b>
+       <span>Common free days (20%)</span><div class="bar"><i style="width:${p.av*100}%"></i></div><b>${Math.round(p.av*100)}%</b>
+       <span>Rating (15%)</span><div class="bar"><i style="width:${p.rt*100}%"></i></div><b>${Math.round(p.rt*100)}%</b>
+     </div></div>
+   </div>`).join("");
+  requestAnimationFrame(()=>document.querySelectorAll(".ring").forEach(r=>r.style.setProperty("--p",r.dataset.p)))}
+function invite(id,btn){const s=students[id];if(myTeam.length>=5){toast("Team is full (6 members)");return}
+  btn.textContent="Invite sent…";btn.disabled=true;toast(`Invite sent to ${s.name}`);
+  ensureConvo("s"+id);addMsg("s"+id,"me",`Hi ${s.name.split(" ")[0]}! We'd love to have you on our hackathon team 🙂`);
+  setTimeout(()=>{myTeam.push(s);addMsg("s"+id,"them","Sounds great, I'm in! 🙌");renderTeam();confetti();toast(`🎉 ${s.name} joined your team!`);findMates(false)},1500)}
+function renderTeam(){const m=me();$("teamCount").textContent=`(${myTeam.length+1}/6)`;
+  $("teamList").innerHTML=`<div class="mem">${avatar("You","var(--grad)",36)}<div><b>You</b><div class="muted">${[...sel("optSkills")].join(", ")||"–"}</div></div></div>`+
+   myTeam.map(s=>`<div class="mem">${avatar(s.name,s.color,36)}<div><b>${s.name}</b><div class="muted">${[...s.skills].join(", ")}</div></div></div>`).join("");
+  const have=ROLES.filter(r=>m.skills.has(r)),pct=Math.round(100*have.length/ROLES.length);$("covBar").style.width=pct+"%";$("covPct").textContent=pct+"%";
+  $("covChips").innerHTML=ROLES.map(r=>`<span class="chip ${m.skills.has(r)?"green":""}">${m.skills.has(r)?"✓":"○"} ${r}</span>`).join("")}
+function profile(id){const s=students[id];$("profBody").innerHTML=`
+  <div style="display:flex;gap:14px;align-items:center">${avatar(s.name,s.color,62)}<div><h2 style="margin:0">${s.name}</h2><div class="muted"><span class="online"></span>${s.branch} · Year ${s.year}</div></div><button class="x" onclick="closeAll()">×</button></div>
+  <div style="margin:18px 0 6px"><b>Skills</b></div>${[...s.skills].map(x=>`<span class="chip green">${x}</span>`).join("")}
+  <div style="margin:14px 0 6px"><b>Interests</b></div>${[...s.interests].map(x=>`<span class="chip red">${x}</span>`).join("")}
+  <div style="margin:14px 0 6px"><b>Free on</b></div>${[...s.slots].map(x=>`<span class="chip">${x}</span>`).join("")}
+  <div style="margin:16px 0"><b>Reputation</b> <span class="stars">${"★".repeat(Math.round(s.rating))}${"☆".repeat(5-Math.round(s.rating))}</span> ${s.rating} / 5</div>
+  <button class="btn" onclick="closeAll();openChat('s${s.id}')">💬 Message ${s.name.split(" ")[0]}</button>`;openModal("profModal")}
+
+/* ================= auto build ================= */
+let lastCrew=[],lastRand=[],view="crew";
+function kpis(a,b,label){$("kpis").innerHTML=`
+  <div class="card kpi lose"><b>${b.pct.toFixed(1)}%</b><span class="muted">Random teams with all 4 core roles</span></div>
+  <div class="card kpi win"><b>${a.pct.toFixed(1)}%</b><span class="muted">CampusCrew teams with all 4 core roles</span></div>
+  <div class="card kpi lose"><b>${b.avg.toFixed(2)}</b><span class="muted">Avg roles per team – random</span></div>
+  <div class="card kpi win"><b>${a.avg.toFixed(2)}</b><span class="muted">Avg roles per team – CampusCrew</span></div>`;$("autoNote").innerHTML=`<div class="note">${label}</div>`}
+function teamCard(t,i,lbl){const u=union(t.map(m=>m.skills)),full=CORE.every(r=>u.has(r));
+  return`<div class="card team ${full?"full":""}" style="animation-delay:${i*.04}s"><div class="hd"><span>${lbl} ${i+1}</span>${full?'<span class="chip green">✓ Complete</span>':`<span class="chip amber">Missing ${CORE.filter(r=>!u.has(r)).length}</span>`}</div>
+   ${t.map(m=>`<div class="row"><span>${m.name}</span><span>${[...m.skills].map(s=>s.split("/")[0]).join(", ")}</span></div>`).join("")}</div>`}
+function renderTeams(){$("sw").style.display="inline-flex";$("sw").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  $("teamsGrid").innerHTML=(view==="crew"?lastCrew:lastRand).map((t,i)=>teamCard(t,i,view==="crew"?"Team":"Group")).join("")}
+$("sw").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=b.dataset.v;renderTeams()});
+function scarce(){return CORE.map(r=>[r,students.filter(s=>s.skills.has(r)).length]).sort((a,b)=>a[1]-b[1]).map(([r,n])=>`${r}: ${n}`).join(" · ")}
+function runAuto(){lastCrew=buildTeams(students,6);lastRand=randomTeams(students,6,seed);
+  kpis(evaluate(lastCrew),evaluate(lastRand),`This batch (#${seed}) · students per core role → ${scarce()}. Few designers/pitchers limits how many teams can be complete.`);renderTeams()}
+function newBatch(){seed++;students=makeStudents(60,seed);myTeam=[];renderTeam();renderHome();runAuto();toast("New batch of 60 sample students")}
+function runMany(){const A=[],B=[];let wins=0;for(let s=1;s<=20;s++){const st=makeStudents(60,s),a=evaluate(buildTeams(st,6)),b=evaluate(randomTeams(st,6,s));A.push(a);B.push(b);if(a.pct>b.pct)wins++}
+  const m=X=>({pct:mean(X.map(x=>x.pct)),avg:mean(X.map(x=>x.avg))});kpis(m(A),m(B),`Average over 20 batches of 60 sample students · CampusCrew beat random grouping in <b>${wins} of 20</b> batches.`);
+  $("sw").style.display="none";$("teamsGrid").innerHTML=""}
+
+/* ================= services ================= */
+const CATS={"Photography":["📸","linear-gradient(135deg,#FFE4D6,#FFD0B5)"],"Design":["🎨","linear-gradient(135deg,#EDE4FF,#D9C8FF)"],"Video Editing":["🎬","linear-gradient(135deg,#DCEEFF,#BFDFFF)"],"Tutoring":["📚","linear-gradient(135deg,#DDF7EA,#BDEFD5)"],"Web Development":["💻","linear-gradient(135deg,#E3E8FF,#C9D2FF)"],"Resume Review":["📄","linear-gradient(135deg,#FFF6CC,#FFEA99)"],"Content Writing":["✍️","linear-gradient(135deg,#FFE0EF,#FFC6E0)"]};
+const SEED=[
+ {title:"Event Photography",cat:"Photography",name:"Kabir (B.Des, 3rd yr)",type:"Negotiable",amt:300,desc:"Fests, club events and portraits. Edited photos delivered in 2 days.",rating:4.8,reviews:23},
+ {title:"Poster & Logo Design",cat:"Design",name:"Ananya (B.Des, 2nd yr)",type:"Starting from",amt:100,desc:"Event posters, club logos and social media creatives.",rating:4.6,reviews:17},
+ {title:"Reels & Video Editing",cat:"Video Editing",name:"Yash (BBA, 2nd yr)",type:"Negotiable",amt:200,desc:"Instagram reels, project demo videos and aftermovies.",rating:4.7,reviews:12},
+ {title:"DSA Tutoring",cat:"Tutoring",name:"Meera (CSE, 4th yr)",type:"Skill swap",amt:0,desc:"Arrays to DP – weekend sessions. Teach me design in return!",rating:4.9,reviews:31},
+ {title:"Resume Review",cat:"Resume Review",name:"Rohan (CSE, 4th yr)",type:"Free",amt:0,desc:"ATS-friendly resume feedback before placement season.",rating:4.5,reviews:40},
+ {title:"Portfolio Website",cat:"Web Development",name:"Isha (IT, 3rd yr)",type:"Starting from",amt:400,desc:"Personal portfolio site with your projects and resume.",rating:4.6,reviews:9},
+ {title:"Report Proofreading",cat:"Content Writing",name:"Sana (BBA, 3rd yr)",type:"Negotiable",amt:100,desc:"Grammar and formatting check for project reports.",rating:4.4,reviews:14}];
+const PAID=s=>!["Free","Skill swap"].includes(s.type);
+const priceLabel=s=>!PAID(s)?s.type:(s.type==="Starting from"?`From ₹${s.amt}`:`₹${s.amt}`);
+const priceTag=s=>!PAID(s)?`<span class="chip green">${s.type==="Free"?"🎁 Free":"🔁 Skill swap"}</span>`:s.type==="Negotiable"?`<span class="chip amber">🤝 Negotiable</span>`:s.type==="Starting from"?`<span class="chip">📈 Starting price</span>`:`<span class="chip">🔒 Fixed</span>`;
+let svcs=JSON.parse(localStorage.getItem("cc4_svcs")||"null")||SEED;svcs.forEach((s,i)=>s.key=s.key||("v"+i));
+let cat="";
+$("fCat").innerHTML=Object.keys(CATS).map(c=>`<option>${c}</option>`).join("");
+function renderCats(){$("catChips").innerHTML=["All",...Object.keys(CATS)].map(c=>`<span class="toggle ${(c==="All"&&!cat)||c===cat?"on":""}" onclick="cat='${c==="All"?"":c}';renderCats();renderSvcs()">${c==="All"?"✨ All":CATS[c][0]+" "+c}</span>`).join("")}
+function renderSvcs(){const q=$("q").value.toLowerCase();$("hsServices").dataset.to=svcs.length;
+  const list=svcs.filter(s=>(!cat||s.cat===cat)&&(s.title+s.desc+s.name+s.cat).toLowerCase().includes(q));
+  $("svcs").innerHTML=list.map(s=>`<div class="card svc lift"><div class="cover" style="background:${CATS[s.cat][1]}">${CATS[s.cat][0]}<span class="price">${priceLabel(s)}</span></div><div class="body">
+    <div><span class="chip red">${s.cat}</span>${priceTag(s)}</div><div class="t">${s.title}</div><div class="d">${s.desc||""}</div>
+    <div class="by">${avatar(s.name,"linear-gradient(135deg,#9CA3AF,#4B5563)",28)}<span>${s.name}</span></div>
+    <div class="foot"><span class="muted">${s.rating?`<span class="stars">★</span> <b style="color:var(--ink)">${s.rating}</b> (${s.reviews})`:'<span class="chip green">New</span>'}</span>
+      <div style="display:flex;gap:6px"><button class="btn ghost sm" onclick="openChat('${s.key}')">💬</button><button class="btn sm" onclick="book('${s.key}')">Book</button></div></div>
+  </div></div>`).join("")||`<p class="muted">No services found.</p>`}
+function addService(){const s={title:$("fTitle").value.trim(),cat:$("fCat").value,name:$("fName").value.trim(),type:$("fType").value,amt:Math.max(0,+$("fAmt").value||0),desc:$("fDesc").value.trim(),rating:null,key:"v"+Date.now()};
+  if(!s.title||!s.name){toast("Add a title and your name");return}
+  if(PAID(s)&&!s.amt){toast("Enter your price, or choose Free / Skill swap");return}
+  if(/(write|writing|do|complete)\s+(my|your|their|the)?\s*assignments?|assignment\s+writing/i.test(s.title+" "+s.desc)){toast("⚠️ Not allowed: ghost-writing assignments (integrity policy)");return}
+  svcs.unshift(s);localStorage.setItem("cc4_svcs",JSON.stringify(svcs));renderSvcs();closeAll();["fTitle","fName","fAmt","fDesc"].forEach(i=>$(i).value="");confetti();toast("✅ Your service is live!")}
+let booking=null;
+function book(key){const s=booking=svcs.find(x=>x.key===key);$("bTitle").textContent="Book: "+s.title;
+  $("bBy").textContent=`by ${s.name} · ${priceLabel(s)}${s.type==="Negotiable"?" (negotiable)":""}`;
+  $("offerField").style.display=PAID(s)&&s.type!=="Fixed"?"block":"none";$("bOffer").value=PAID(s)?Math.round(s.amt*(s.type==="Negotiable"?0.8:1)):"";
+  $("bDate").value=new Date(Date.now()+3*864e5).toISOString().slice(0,10);$("bNote").value="";openModal("bookModal")}
+function confirmBooking(){const s=booking,offer=+$("bOffer").value||0,canOffer=PAID(s)&&s.type!=="Fixed";closeAll();ensureConvo(s.key);
+  addMsg(s.key,"me",`Hi! I'd like to book "${s.title}" for ${$("bDate").value}.${canOffer?` My offer: ₹${offer}.`:""} ${$("bNote").value}`.trim());
+  toast("📩 Booking request sent to "+s.name.split(" (")[0]);
+  let reply="Thanks for the request! I'm available on that date – let's confirm the details here 😊";
+  if(s.type==="Skill swap")reply="Happy to swap skills! What can you teach me in return? 😊";
+  else if(canOffer&&offer<s.amt){const counter=Math.round((offer+s.amt)/2/10)*10;reply=`Thanks! ₹${offer} is a bit low for me – can we meet in the middle at ₹${counter}? 🤝`}
+  else if(canOffer)reply=`Deal at ₹${offer}! I'm available on that date – see you then 👍`;
+  setTimeout(()=>addMsg(s.key,"them",reply),1600)}
+
+/* ================= events ================= */
+const EVS=[
+ {name:"CampusHack 2026 – internal round",d:"12",m:"DEC",size:"Team of 6",tags:["Smart Campus","HealthTech","EdTech"],need:"Frontend, Backend, Design, Pitch",bg:"linear-gradient(120deg,#E11D2A,#FF6B6B)",e:"🏆"},
+ {name:"Design Sprint Challenge",d:"20",m:"DEC",size:"Team of 3",tags:["UI/UX"],need:"2 designers + 1 frontend",bg:"linear-gradient(120deg,#7C3AED,#A78BFA)",e:"🎨"},
+ {name:"AgriTech Ideathon",d:"08",m:"JAN",size:"Team of 4",tags:["AgriTech","Sustainability"],need:"Research, ML/AI, Pitch",bg:"linear-gradient(120deg,#059669,#34D399)",e:"🌾"},
+ {name:"FinTech Build Weekend",d:"17",m:"JAN",size:"Team of 4",tags:["FinTech"],need:"Backend, Frontend, Pitch",bg:"linear-gradient(120deg,#2563EB,#60A5FA)",e:"💳"}];
+$("evs").innerHTML=EVS.map(e=>`<div class="card ev lift"><div class="banner" style="background:${e.bg}"><span style="font-size:34px">${e.e}</span><div class="date"><b>${e.d}</b><small>${e.m}</small></div></div><div class="body">
+  <h3 style="font-size:17px">${e.name}</h3><div class="muted">${e.size} · ideal mix: ${e.need}</div><div style="margin:10px 0 14px">${e.tags.map(t=>`<span class="chip red">${t}</span>`).join("")}</div>
+  <button class="btn sm" onclick="go('find')">🤝 Find teammates</button> <button class="btn ghost sm" onclick="this.textContent='✓ Registered';this.className='btn sm done';this.disabled=true;confetti();toast('Team registered for ${e.name}')">Register team</button></div></div>`).join("");
+
+/* ================= profile ================= */
+function renderProfile(){$("pTeam").textContent=8+myTeam.length;
+  const lv=[["Frontend",80,"Advanced"],["Backend",65,"Intermediate"],["ML/AI",45,"Beginner"],["Pitch/Presentation",55,"Intermediate"]];
+  $("skillBars").innerHTML=lv.map(([s,v,l])=>`<div class="skill"><span>${s}</span><div class="bar"><i style="width:${v}%"></i></div><span class="muted">${l}</span></div>`).join("")}
+
+/* ================= messages ================= */
+const convos={};let current=null;
+function who(key){if(key.startsWith("s")){const s=students[+key.slice(1)];return{name:s.name,color:s.color,sub:`${s.branch} · ${[...s.skills].join(", ")}`}}
+  const v=svcs.find(x=>x.key===key);return{name:v.name.split(" (")[0],color:"linear-gradient(135deg,#9CA3AF,#4B5563)",sub:v.title}}
+function ensureConvo(key){if(!convos[key])convos[key]={msgs:[],unread:0,t:Date.now()}}
+function addMsg(key,from,text){ensureConvo(key);const c=convos[key];c.msgs.push({from,text,time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})});c.t=Date.now();
+  if(from==="them"&&!(current===key&&$("drawer").classList.contains("show")))c.unread++;renderConvos();if(current===key)renderChat()}
+function renderConvos(){const keys=Object.keys(convos).sort((a,b)=>convos[b].t-convos[a].t);
+  const un=keys.reduce((a,k)=>a+convos[k].unread,0);$("badge").style.display=un?"grid":"none";$("badge").textContent=un;
+  $("cvList").innerHTML=keys.map(k=>{const w=who(k),l=convos[k].msgs.slice(-1)[0];return`<div class="cv ${k===current?"on":""}" onclick="selectConvo('${k}')">${avatar(w.name,w.color)}<div><div class="nm">${w.name}</div><div class="last">${l?l.text:"Start a conversation"}</div></div>${convos[k].unread?'<span class="dot"></span>':""}</div>`}).join("")||`<p class="muted" style="padding:0 18px">No conversations yet.</p>`}
+function openChat(key){$("drawer").classList.add("show");$("scrim").classList.add("show");if(key){ensureConvo(key);selectConvo(key)}else renderConvos()}
+function selectConvo(key){current=key;convos[key].unread=0;renderConvos();renderChat();setTimeout(()=>{const i=$("msgIn");i&&i.focus()},60)}
+function renderChat(){const w=who(current),c=convos[current];$("chat").innerHTML=`
+  <div class="chat-hd">${avatar(w.name,w.color)}<div><b>${w.name}</b><div class="muted"><span class="online"></span>Online · ${w.sub}</div></div><button class="x" onclick="closeAll()">×</button></div>
+  <div class="msgs" id="msgs">${c.msgs.length?c.msgs.map(m=>`<div class="msg ${m.from}">${esc(m.text)}<small>${m.time}</small></div>`).join(""):'<div class="empty">Say hi 👋</div>'}</div>
+  <div class="typing" id="typing"></div>
+  <div class="quick"><span>Are you free this weekend?</span><span>Can we discuss the idea?</span><span>What's your rate?</span></div>
+  <div class="compose"><input id="msgIn" placeholder="Type a message…" onkeydown="if(event.key==='Enter')send()"><button class="btn" onclick="send()">Send ➤</button></div>`;
+  $("chat").querySelectorAll(".quick span").forEach(q=>q.onclick=()=>{$("msgIn").value=q.textContent;send()});const m=$("msgs");m.scrollTop=m.scrollHeight}
+const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const REPLIES=["Sure! Let's catch up after class 🙂","Yes, I'm free on the weekend.","Sounds interesting – tell me more about the idea!","Happy to help. Shall we meet in the library?","Great, I'll share my portfolio here."];
+function send(){const i=$("msgIn"),t=i.value.trim();if(!t)return;const k=current;addMsg(k,"me",t);i.value="";$("msgIn").focus();
+  setTimeout(()=>{if(current===k&&$("typing"))$("typing").textContent=who(k).name.split(" ")[0]+" is typing…"},400);
+  setTimeout(()=>{addMsg(k,"them",REPLIES[Math.floor(Math.random()*REPLIES.length)]);if($("typing"))$("typing").textContent=""},1700)}
+ensureConvo("s3");convos["s3"].msgs.push({from:"them",text:"Hey! Saw you're forming a team for CampusHack – I'd love to join 🙌",time:"10:12"});convos["s3"].unread=1;
+
+renderHome();countUp();renderTeam();renderCats();renderSvcs();renderConvos();findMates(false);renderProfile();
+</script>
+</body>
+</html>

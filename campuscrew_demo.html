@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusCrew</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lime:#C6F432; --lime-d:#A9D61A; --ink:#EDEFF3; --ink2:#B9BFCC; --mute:#8C93A3; --line:#1F2430; --line2:#2A303D;
+    --bg:#0A0C10; --card:#11141A; --card2:#161A22; --green:#4ADE80; --green-l:rgba(74,222,128,.12); --amber:#FBBF24; --amber-l:rgba(251,191,36,.12);
+    --red:#F87171; --red-l:rgba(248,113,113,.12); --r:18px; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --grad:var(--lime); --shadow:0 1px 0 rgba(255,255,255,.02); --shadow-h:0 0 0 1px rgba(198,244,50,.35),0 10px 30px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Space Grotesk",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);font-size:14px;background:var(--bg);
+    background-image:radial-gradient(700px 400px at 90% -10%,rgba(198,244,50,.07),transparent 60%),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:auto,44px 44px,44px 44px;background-attachment:fixed}
+  button{font-family:inherit} ::selection{background:var(--lime);color:#0A0C10}
+  .mono{font-family:var(--mono)} .lime{color:var(--lime)}
+  .top{position:sticky;top:0;z-index:20;background:rgba(10,12,16,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .top-in{max-width:1300px;margin:auto;display:flex;align-items:center;gap:22px;padding:12px 24px}
+  .logo{font-weight:700;font-size:20px;letter-spacing:-.4px;cursor:pointer;white-space:nowrap}
+  .nav{display:flex;gap:4px;flex:1;flex-wrap:wrap;font-family:var(--mono);font-size:13px}
+  .nav button{border:0;background:none;padding:8px 11px;border-radius:8px;color:var(--mute);font-family:var(--mono);font-size:13px;cursor:pointer;transition:.15s}
+  .nav button:hover{color:var(--ink);background:var(--card2)} .nav button.active{background:var(--lime);color:#0A0C10;font-weight:600}
+  .chipcd{font-family:var(--mono);font-size:12.5px;color:var(--mute);border:1px solid var(--line);border-radius:8px;padding:8px 11px;white-space:nowrap}
+  .icon-btn{position:relative;border:1px solid var(--line2);background:var(--card);color:var(--ink);width:40px;height:40px;border-radius:10px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+  .icon-btn:hover{border-color:var(--lime)}
+  .badge{position:absolute;top:-6px;right:-6px;background:var(--lime);color:#0A0C10;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:10px;display:none;place-items:center;padding:0 5px;animation:pop .4s}
+  @keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+  main{max-width:1300px;margin:auto;padding:30px 24px 70px}
+  .page{display:none} .page.active{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:40px;letter-spacing:-1.4px;margin:0 0 8px;font-weight:700;line-height:1.05} h2{font-size:19px;margin:0 0 14px;letter-spacing:-.3px} h3{font-size:15px;margin:0 0 10px}
+  .kicker{font-family:var(--mono);font-size:13px;color:var(--lime);margin:0 0 10px}
+  .sub{color:var(--mute);margin:0 0 24px;font-size:14.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;transition:transform .2s,box-shadow .2s,border-color .2s}
+  .lift:hover{transform:translateY(-3px);box-shadow:var(--shadow-h);border-color:rgba(198,244,50,.35)}
+  .btn{border:0;background:var(--lime);color:#0A0C10;font-weight:700;padding:10px 17px;border-radius:10px;cursor:pointer;font-size:14px;transition:.15s;display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{background:#D7FF5C;transform:translateY(-1px);box-shadow:0 8px 24px rgba(198,244,50,.25)} .btn:active{transform:none}
+  .btn:disabled{background:var(--line2);color:var(--mute);cursor:default;transform:none;box-shadow:none}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)} .btn.ghost:hover{border-color:var(--lime);color:var(--lime);box-shadow:none}
+  .btn.sm{padding:7px 12px;font-size:13px;border-radius:9px}
+  .btn.done{background:var(--green-l);color:var(--green);cursor:default}
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:12px;font-weight:500;background:var(--card2);color:var(--ink2);margin:2px 4px 2px 0;border:1px solid var(--line2)}
+  .chip.red{background:rgba(198,244,50,.08);color:var(--lime);border-color:rgba(198,244,50,.25)}
+  .chip.green{background:var(--green-l);color:var(--green);border-color:rgba(74,222,128,.25)} .chip.amber{background:var(--amber-l);color:var(--amber);border-color:rgba(251,191,36,.25)}
+  .muted{color:var(--mute);font-size:13px}
+  .av{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;flex:none;font-size:15px}
+  .sec-hd{display:flex;justify-content:space-between;align-items:end;margin:36px 0 14px} .sec-hd h2{margin:0}
+  .link{color:var(--lime);cursor:pointer;font-size:13px;font-weight:600;font-family:var(--mono)}
+  .hero{border:1px solid var(--line);background:linear-gradient(180deg,var(--card),rgba(17,20,26,.6));border-radius:24px;padding:44px;display:grid;grid-template-columns:1.25fr 1fr;gap:34px;align-items:center;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;width:420px;height:420px;right:-120px;top:-160px;border-radius:50%;background:radial-gradient(circle,rgba(198,244,50,.18),transparent 65%)}
+  .hero>*{position:relative} .hero h1{font-size:52px;letter-spacing:-2px} .hero p{color:var(--ink2);font-size:16.5px;line-height:1.55;margin:14px 0 26px;max-width:560px}
+  .hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .hs{background:var(--card2);border:1px solid var(--line2);border-radius:14px;padding:16px 18px;color:var(--mute);font-size:13px} .hs b{font-size:34px;display:block;letter-spacing:-1px;color:var(--ink)}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .step{display:flex;gap:14px;align-items:flex-start;cursor:pointer}
+  .step .n{width:44px;height:44px;border-radius:12px;background:rgba(198,244,50,.1);color:var(--lime);display:grid;place-items:center;flex:none;font-family:var(--mono);font-weight:600}
+  .step p{color:var(--ink2);margin:4px 0 0;line-height:1.5}
+  .talent{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .tal{text-align:center;cursor:pointer} .tal .av{margin:0 auto 10px;width:56px;height:56px;font-size:18px;border-radius:16px}
+  .countdown{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .cd{display:flex;gap:8px} .cd div{background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:8px 12px;text-align:center;min-width:62px;font-family:var(--mono)} .cd b{font-size:22px;display:block;color:var(--lime)} .cd small{color:var(--mute)}
+  .layout{display:grid;grid-template-columns:310px 1fr 300px;gap:20px;align-items:start}
+  .side{position:sticky;top:86px}
+  .opt-group{margin-bottom:16px} .opt-group h4{margin:0 0 9px;font-size:11.5px;font-family:var(--mono);color:var(--mute);font-weight:400}
+  .toggle{display:inline-block;padding:6px 11px;border:1px solid var(--line2);border-radius:8px;margin:0 6px 8px 0;cursor:pointer;font-size:13px;user-select:none;transition:.15s;background:var(--card2);color:var(--ink2)}
+  .toggle:hover{border-color:var(--lime)} .toggle.on{background:var(--lime);border-color:var(--lime);color:#0A0C10;font-weight:600}
+  .need{background:var(--amber-l);color:var(--amber);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:11px 13px;font-size:13px;margin-top:12px}
+  .cand{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:18px;margin-bottom:12px;animation:fade .35s ease both}
+  .cand:hover{border-color:rgba(198,244,50,.35)}
+  .cand .name{font-weight:600;font-size:16px} .cand .meta{color:var(--mute);font-size:12.5px;margin:3px 0 7px;font-family:var(--mono)}
+  @property --p{syntax:'<number>';inherits:false;initial-value:0}
+  .ring{--p:0;width:68px;height:68px;border-radius:50%;background:conic-gradient(var(--lime) calc(var(--p)*1%),var(--line2) 0);display:grid;place-items:center;margin:0 auto;transition:--p 1s}
+  .ring span{width:56px;height:56px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:600;font-size:15px;color:var(--lime);font-family:var(--mono)}
+  .actions{display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:124px}
+  .why{display:none;grid-column:1/-1;border-top:1px dashed var(--line2);padding-top:12px} .cand.open .why{display:block}
+  .bars{display:grid;grid-template-columns:170px 1fr 44px;gap:7px 12px;font-size:12.5px;color:var(--ink2);align-items:center;max-width:560px}
+  .bars b{font-family:var(--mono);font-weight:400;color:var(--mute)}
+  .bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden} .bar i{display:block;height:100%;background:var(--lime);border-radius:6px;transition:width .8s}
+  .skel{height:118px;border-radius:var(--r);margin-bottom:12px;background:linear-gradient(90deg,var(--card) 0%,var(--card2) 50%,var(--card) 100%);background-size:200% 100%;animation:shim 1s linear infinite;border:1px solid var(--line)}
+  @keyframes shim{to{background-position:-200% 0}}
+  .myteam .mem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);animation:fade .4s} .myteam .mem:last-child{border:0}
+  .myteam .av{width:36px;height:36px;font-size:12px;border-radius:10px}
+  .cov{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0 4px}
+  .progress{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:7px 0 2px} .progress i{display:block;height:100%;background:var(--lime);transition:width .6s ease}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+  .kpi b{font-size:34px;display:block;letter-spacing:-1px;font-family:var(--mono)} .kpi.win b{color:var(--lime)} .kpi.lose b{color:#5B6170}
+  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .team{padding:15px;animation:fade .35s both} .team.full{border-color:rgba(74,222,128,.35)}
+  .team .hd{display:flex;justify-content:space-between;font-weight:600;margin-bottom:8px}
+  .team .row{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:var(--ink2)} .team .row span:last-child{font-family:var(--mono);color:var(--mute);font-size:11.5px}
+  .switch{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:14px}
+  .switch button{border:0;background:none;padding:7px 15px;border-radius:7px;cursor:pointer;font-weight:600;color:var(--mute);font-family:var(--mono);font-size:12.5px}
+  .switch button.on{background:var(--lime);color:#0A0C10}
+  .note{font-size:13px;color:var(--ink2);background:var(--card);border:1px dashed var(--line2);border-radius:10px;padding:10px 14px;margin-bottom:18px}
+  .svc-top{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .search{flex:1;min-width:240px;padding:12px 16px 12px 42px;border:1px solid var(--line2);border-radius:12px;font-size:14.5px;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%238C93A3' stroke-width='2'%3E%3Ccircle cx='8' cy='8' r='6'/%3E%3Cpath d='m13 13 4 4'/%3E%3C/svg%3E") 14px 50% no-repeat;color:var(--ink);outline:none;font-family:inherit}
+  .search:focus{border-color:var(--lime)}
+  .svcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:16px}
+  .svc{padding:0;overflow:hidden;display:flex;flex-direction:column}
+  .svc .cover{height:92px;display:grid;place-items:center;font-size:40px;position:relative;border-bottom:1px solid var(--line)}
+  .svc .cover .price{position:absolute;right:12px;top:12px;background:var(--bg);color:var(--lime);font-family:var(--mono);font-weight:600;font-size:12px;padding:4px 9px;border-radius:7px;border:1px solid var(--line2)}
+  .svc .body{padding:15px 17px;display:flex;flex-direction:column;gap:7px;flex:1}
+  .svc .t{font-weight:600;font-size:16px} .svc .d{color:var(--ink2);font-size:13px;line-height:1.45}
+  .svc .by{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:2px;color:var(--ink2)} .svc .by .av{width:28px;height:28px;font-size:11px;border-radius:8px}
+  .svc .foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:11px;border-top:1px solid var(--line)}
+  .stars{color:var(--amber);font-size:13px}
+  .events{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+  .ev{padding:0;overflow:hidden}
+  .ev .banner{height:80px;padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line)}
+  .ev .date{background:var(--bg);color:var(--lime);border:1px solid var(--line2);border-radius:10px;text-align:center;padding:6px 12px;font-family:var(--mono);line-height:1.15}
+  .ev .date b{display:block;font-size:20px} .ev .date small{font-size:11px;color:var(--mute)}
+  .ev .body{padding:16px 20px}
+  .prof{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+  .prof-hd{text-align:center} .prof-hd .av{width:92px;height:92px;font-size:28px;margin:0 auto 12px;border-radius:24px}
+  .rep{font-size:46px;font-weight:700;letter-spacing:-1px;color:var(--lime);font-family:var(--mono)}
+  .skill{display:grid;grid-template-columns:160px 1fr 100px;gap:12px;align-items:center;margin-bottom:12px} .skill span:last-child{font-family:var(--mono);font-size:12px}
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .bdg{text-align:center;padding:16px 10px} .bdg .e{font-size:28px} .bdg.locked{opacity:.35;filter:grayscale(1)}
+  .timeline .it{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)} .timeline .it:last-child{border:0}
+  .timeline .dotc{width:30px;height:30px;border-radius:8px;background:var(--card2);display:grid;place-items:center;flex:none}
+  .dream{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .dm{background:var(--card2);border:1px solid var(--line2);border-radius:14px;padding:16px;animation:fade .4s both}
+  .dm .role{font-family:var(--mono);font-size:12px;color:var(--lime);margin-top:10px}
+  .covgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 24px;margin-top:22px}
+  .score{font-size:64px;font-weight:700;color:var(--lime);letter-spacing:-3px;line-height:1;font-family:var(--mono)}
+  .pv-hd{display:flex;gap:16px;align-items:center}
+  .pv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+  .pv-stats div{background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:10px;text-align:center} .pv-stats b{display:block;font-size:20px;color:var(--lime);font-family:var(--mono)}
+  .pv-work{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 16px} .pv-work div{height:70px;border-radius:10px;border:1px solid var(--line2);display:grid;place-items:center;font-size:12px;color:var(--mute);text-align:center;padding:6px}
+  .pv-rev{border-top:1px solid var(--line);padding:10px 0;font-size:13.5px} .pv-rev .muted{font-size:12px}
+  .by-btn{background:none;border:0;padding:0;color:var(--ink2);cursor:pointer;font:inherit;display:flex;align-items:center;gap:8px;text-align:left}
+  .by-btn:hover span{color:var(--lime);text-decoration:underline}
+  .by-btn{min-width:0;flex:1} .by-btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .by .link{white-space:nowrap;flex:none}
+  .bk-prov{display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--line2);border-radius:12px;padding:12px;margin:12px 0 16px}
+  .modal .card.wide{width:560px;max-height:90vh;overflow:auto}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);display:none;z-index:40} .scrim.show{display:block}
+  .drawer{position:fixed;top:0;right:0;transform:translateX(105%);width:760px;max-width:100vw;height:100vh;background:var(--card);border-left:1px solid var(--line);z-index:50;transition:transform .35s cubic-bezier(.2,.8,.2,1);display:grid;grid-template-columns:260px 1fr}
+  .drawer.show{transform:none}
+  .convos{border-right:1px solid var(--line);overflow:auto} .convos h3{padding:20px 18px 10px;margin:0;font-size:18px}
+  .cv{display:flex;gap:10px;padding:11px 16px;cursor:pointer;align-items:center;border-left:3px solid transparent;transition:.15s}
+  .cv:hover{background:var(--card2)} .cv.on{background:var(--card2);border-left-color:var(--lime)}
+  .cv .av{width:40px;height:40px;font-size:13px} .cv .nm{font-weight:600;font-size:13.5px} .cv .last{color:var(--mute);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  .cv .dot{width:9px;height:9px;border-radius:50%;background:var(--lime);margin-left:auto;flex:none}
+  .online{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;box-shadow:0 0 8px var(--green)}
+  .chat{display:flex;flex-direction:column;height:100vh}
+  .chat-hd{display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)} .chat-hd .av{width:42px;height:42px;font-size:14px}
+  .msgs{flex:1;overflow:auto;padding:20px;background:var(--bg);display:flex;flex-direction:column;gap:9px}
+  .msg{max-width:72%;padding:10px 14px;border-radius:14px;line-height:1.45;font-size:14px;animation:fade .25s}
+  .msg.them{background:var(--card2);border:1px solid var(--line2);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.me{background:var(--lime);color:#0A0C10;align-self:flex-end;border-bottom-right-radius:4px;font-weight:500}
+  .msg small{display:block;opacity:.6;font-size:10.5px;margin-top:3px;font-family:var(--mono)}
+  .typing{color:var(--mute);font-size:12px;font-family:var(--mono);padding:0 20px 6px;height:18px}
+  .compose{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+  .compose input{flex:1;padding:12px 15px;border:1px solid var(--line2);border-radius:12px;font-size:14px;background:var(--bg);color:var(--ink);outline:none;font-family:inherit}
+  .compose input:focus{border-color:var(--lime)}
+  .quick{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
+  .quick span{font-size:12px;padding:6px 11px;border:1px solid var(--line2);border-radius:8px;cursor:pointer;color:var(--ink2);font-family:var(--mono)} .quick span:hover{border-color:var(--lime);color:var(--lime)}
+  .empty{display:grid;place-items:center;height:100%;color:var(--mute);text-align:center;padding:30px}
+  .x{margin-left:auto;border:0;background:none;font-size:24px;cursor:pointer;color:var(--mute)}
+  .modal{position:fixed;inset:0;display:none;place-items:center;z-index:60;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)} .modal.show{display:grid}
+  .modal .card{width:470px;max-width:92vw;padding:26px;animation:fade .25s}
+  .field{margin-bottom:13px} .field label{display:block;font-size:12px;color:var(--mute);margin-bottom:6px;font-family:var(--mono)}
+  .field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line2);border-radius:10px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--ink);outline:none}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--lime)}
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card2);border:1px solid var(--lime);color:var(--ink);padding:12px 20px;border-radius:12px;opacity:0;transition:.3s;z-index:70;font-family:var(--mono);font-size:13px}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:80;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+  @media (max-width:1100px){.layout,.prof{grid-template-columns:1fr}.side{position:static}.hero{grid-template-columns:1fr}.steps,.talent,.kpis,.badges,.dream,.covgrid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <div class="logo" onclick="go('home')">campus<span class="lime">crew</span>_</div>
+  <div class="nav" id="nav">
+    <button data-p="home" class="active">~/home</button>
+    <button data-p="find">~/find-team</button>
+    <button data-p="auto">~/auto-build</button>
+    <button data-p="services">~/services</button>
+    <button data-p="events">~/events</button>
+    <button data-p="profile">~/profile</button>
+  </div>
+  <div class="chipcd">CampusHack in <span class="lime" id="cdChip">22d</span></div>
+  <button class="icon-btn" title="Messages" aria-label="Messages" onclick="openChat()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="badge" id="badge"></span></button>
+  <div class="av" style="width:38px;height:38px;font-size:12px;background:var(--lime);color:#0A0C10;cursor:pointer;border-radius:10px" onclick="go('profile')">YOU</div>
+</div></div>
+
+<main>
+  <!-- HOME -->
+  <section class="page active" id="home">
+    <div class="hero">
+      <div>
+        <p class="kicker">&gt; find_your_crew --campus</p>
+        <h1>Find your crew.<br>Share your skills.<br>Ship together.</h1>
+        <p>Form balanced hackathon teams, discover campus talent like designers and photographers, and build a skill profile that recruiters trust.</p>
+        <button class="btn" onclick="go('find')">Find teammates →</button>
+        <button class="btn ghost" onclick="go('services')">Browse services</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hs"><b class="count" data-to="60">0</b>students on CampusCrew</div>
+        <div class="hs"><b class="count" id="hsServices" data-to="7">0</b>skill services listed</div>
+        <div class="hs"><b class="count" data-to="4">0</b>upcoming events</div>
+        <div class="hs"><b class="count" data-to="6">0</b>skill roles matched</div>
+      </div>
+    </div>
+
+    <div class="sec-hd"><h2>How it works</h2></div>
+    <div class="steps">
+      <div class="card lift step" onclick="go('profile')"><div class="n">01</div><div><h3>Build your skill profile</h3><p>Add your skills, interests and free days. Earn badges as you collaborate.</p></div></div>
+      <div class="card lift step" onclick="go('find')"><div class="n">02</div><div><h3>Get matched</h3><p>We rank students who bring the skills your team is missing – with a clear match %.</p></div></div>
+      <div class="card lift step" onclick="go('services')"><div class="n">03</div><div><h3>Build & book</h3><p>Chat, form your team, register for events – or book a designer or photographer.</p></div></div>
+    </div>
+
+    <div class="sec-hd"><h2>Top talent on campus</h2><span class="link" onclick="go('find')">See all →</span></div>
+    <div class="talent" id="talent"></div>
+
+    <div class="sec-hd"><h2>Next hackathon</h2><span class="link" onclick="go('events')">All events →</span></div>
+    <div class="card countdown">
+      <div class="mono lime" style="font-size:13px;border:1px solid var(--line2);border-radius:10px;padding:10px 12px">next_event</div>
+      <div style="flex:1"><h2 style="margin:0 0 4px;color:#fff">CampusHack 2026 – internal round</h2><div style="opacity:.75">Team of 6 · ideal mix: Frontend, Backend, Design, Pitch</div></div>
+      <div class="cd" id="cd"></div>
+      <button class="btn" onclick="go('find')">Find my team</button>
+    </div>
+    <p class="muted" style="margin-top:22px">Demo build · 60 sample student profiles (synthetic data) · all matching runs live in your browser.</p>
+  </section>
+
+  <!-- FIND -->
+  <section class="page" id="find">
+    <h1>Find Teammates</h1>
+    <p class="sub">Match score = 40% new skills · 25% shared interests · 20% common free days · 15% rating</p>
+    <div class="layout">
+      <div class="card side">
+        <div class="opt-group"><h4>Skills your team already has</h4><div id="optSkills"></div></div>
+        <div class="opt-group"><h4>Your interests</h4><div id="optInts"></div></div>
+        <div class="opt-group"><h4>Days you're free</h4><div id="optDays"></div></div>
+        <button class="btn" style="width:100%;justify-content:center" onclick="findMates(true)">🔍 Find best matches</button>
+        <div class="need" id="need"></div>
+      </div>
+      <div id="results"></div>
+      <div class="card side myteam">
+        <h3>My Team <span class="muted" id="teamCount">(1/6)</span></h3>
+        <div id="teamList"></div>
+        <div class="muted" style="margin-top:12px;display:flex;justify-content:space-between"><span>Role coverage</span><b id="covPct">0%</b></div>
+        <div class="progress"><i id="covBar" style="width:0"></i></div>
+        <div class="cov" id="covChips"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTO -->
+  <section class="page" id="auto">
+    <h1>Auto-Build Teams</h1>
+    <p class="sub">Forms teams of 6 from 60 sample students and compares random grouping (like friend groups) with CampusCrew matching. Core roles: Frontend, Backend, UI/UX Design, Pitch.</p>
+    <button class="btn" onclick="runAuto()">⚙️ Build teams for this batch</button>
+    <button class="btn ghost" onclick="newBatch()">🔄 New batch of students</button>
+    <button class="btn ghost" onclick="runMany()">📊 Average over 20 batches</button>
+    <div class="kpis" id="kpis"></div>
+    <div id="autoNote"></div>
+    <div class="switch" id="sw" style="display:none"><button class="on" data-v="crew">CampusCrew teams</button><button data-v="rand">Random teams</button></div>
+    <div class="teams" id="teamsGrid"></div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="page" id="services">
+    <h1>Skill Services</h1>
+    <p class="sub">Talent from your own campus – book it, or list your own skill.</p>
+    <div class="svc-top">
+      <input class="search" id="q" placeholder="Search photography, design, tutoring…" oninput="renderSvcs()">
+      <button class="btn" onclick="openModal('listModal')">＋ List your service</button>
+    </div>
+    <div id="catChips" style="margin-bottom:18px"></div>
+    <div class="svcs" id="svcs"></div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="page" id="events">
+    <h1>Events & Hackathons</h1>
+    <p class="sub">Sample events posted by clubs.</p>
+    <div class="events" id="evs"></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="page" id="profile">
+    <h1>My Profile</h1>
+    <p class="sub">Your skills, reputation and badges grow with every team and service.</p>
+    <div class="prof">
+      <div class="card prof-hd">
+        <div class="av" style="background:var(--lime);color:#0A0C10">YOU</div>
+        <h2 style="margin:0">Devansh Modi</h2>
+        <div class="muted">CSE · 25BCON0377 · JECRC University</div>
+        <div style="margin:14px 0 4px" class="muted">Reputation</div>
+        <div class="rep">4.7</div><div class="stars">★★★★★</div>
+        <div style="display:flex;justify-content:space-around;margin-top:16px">
+          <div><b style="font-size:20px">3</b><div class="muted">Hackathons</div></div>
+          <div><b style="font-size:20px" id="pTeam">1</b><div class="muted">Teammates</div></div>
+          <div><b style="font-size:20px">2</b><div class="muted">Services</div></div>
+        </div>
+        <div style="margin-top:16px"><span class="chip red">HealthTech</span><span class="chip red">Smart Campus</span></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:18px"><h2>Skills</h2><div id="skillBars"></div></div>
+        <div class="card" style="margin-bottom:18px"><h2>Badges</h2><div class="badges">
+          <div class="card bdg lift"><div class="e">🚀</div><b>First Hackathon</b><div class="muted">Joined a team</div></div>
+          <div class="card bdg lift"><div class="e">🤝</div><b>Team Player</b><div class="muted">Rated 4.5+ by teammates</div></div>
+          <div class="card bdg lift"><div class="e">🎓</div><b>Mentor</b><div class="muted">Helped 5 juniors</div></div>
+          <div class="card bdg locked"><div class="e">🏆</div><b>Winner</b><div class="muted">Win a hackathon</div></div>
+        </div></div>
+        <div class="card timeline"><h2>Recent activity</h2>
+          <div class="it"><div class="dotc">🏆</div><div><b>Registered for CampusHack 2026</b><div class="muted">2 days ago</div></div></div>
+          <div class="it"><div class="dotc">⭐</div><div><b>Received a 5★ review for DSA Tutoring</b><div class="muted">“Explained recursion really well!” · 5 days ago</div></div></div>
+          <div class="it"><div class="dotc">🎨</div><div><b>Booked Poster Design from Ananya</b><div class="muted">1 week ago</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" onclick="closeAll()"></div>
+<div class="drawer" id="drawer">
+  <div class="convos"><h3>Messages</h3><div id="cvList"></div></div>
+  <div class="chat" id="chat"><div class="empty">💬<br>Select a conversation, or press “Message” on any student or service.</div></div>
+</div>
+
+<div class="modal" id="listModal"><div class="card">
+  <div style="display:flex;align-items:center"><h2 style="margin:0">List your service</h2><button class="x" onclick="closeAll()">×</button></div>
+  <p class="muted">Integrity policy: tutoring & proofreading welcome – writing assignments for others is not allowed.</p>
+  <div class="field"><label>Service title</label><input id="fTitle" placeholder="e.g. Event Photography"></div>
+  <div class="field"><label>Category</label><select id="fCat"></select></div>
+  <div class="field"><label>Your name & branch</label><input id="fName" placeholder="e.g. Riya (CSE, 3rd yr)"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="field"><label>Pricing</label><select id="fType" onchange="$('fAmt').disabled=['Free','Skill swap'].includes(this.value)"><option>Negotiable</option><option>Starting from</option><option>Fixed</option><option>Free</option><option>Skill swap</option></select></div>
+    <div class="field"><label>Your price (₹)</label><input id="fAmt" type="number" min="0" placeholder="e.g. 200"></div>
+  </div>
+  <div class="field"><label>Description</label><textarea id="fDesc" rows="2"></textarea></div>
+  <button class="btn" onclick="addService()">Publish service</button>
+</div></div>
+
+<div class="modal" id="bookModal"><div class="card">
+  <div style="display:flex;align-items:center"><h2 style="margin:0" id="bTitle">Book</h2><button class="x" onclick="closeAll()">×</button></div>
+  <p class="muted" id="bBy"></p><div id="bProv"></div>
+  <div class="field"><label>Date needed</label><input type="date" id="bDate"></div>
+  <div class="field" id="offerField"><label>Your offer (₹) – the provider can accept or counter</label><input type="number" min="0" id="bOffer"></div>
+  <div class="field"><label>Details for the provider</label><textarea id="bNote" rows="3" placeholder="e.g. Need photos for our club event, 2 hours"></textarea></div>
+  <button class="btn" onclick="confirmBooking()">Send booking request</button>
+</div></div>
+
+<div class="modal" id="profModal"><div class="card" id="profBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= data & algorithm (same as matcher.py) ================= */
+const ROLES=["Frontend","Backend","ML/AI","UI/UX Design","Pitch/Presentation","Research/Domain"];
+const CORE=["Frontend","Backend","UI/UX Design","Pitch/Presentation"];
+const INTERESTS=["HealthTech","EdTech","FinTech","AgriTech","Sustainability","Smart Campus"];
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const WEIGHTS=[30,25,20,8,7,10];
+const NAMES=["Aarav","Riya","Kabir","Ananya","Vivaan","Isha","Arjun","Meera","Rohan","Sana","Dev","Tanvi","Yash","Kavya","Aditya","Nisha","Kunal","Pooja","Harsh","Diya","Manav","Sneha","Rahul","Aisha","Varun","Neha","Krish","Simran","Ishaan","Priya"];
+const BRANCHES=["CSE","IT","ECE","AI&DS","BBA","B.Des"];
+const GRADS=["#2A3240;color:#C6F432","#2A2440;color:#C4B5FD","#1F3330;color:#5EEAD4","#3A2A2A;color:#FCA5A5","#33301F;color:#FDE68A","#1F2A3A;color:#93C5FD","#2E2238;color:#F0ABFC","#262A33;color:#E5E7EB"];
+function rng(seed){let s=seed>>>0;return()=>((s=(s*1664525+1013904223)>>>0)/4294967296)}
+function pickW(r,it,w){let t=w.reduce((a,b)=>a+b),x=r()*t;for(let i=0;i<it.length;i++){if((x-=w[i])<0)return it[i]}return it[it.length-1]}
+function sample(r,arr,k){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,k)}
+function makeStudents(n,seed){const r=rng(seed),out=[];for(let i=0;i<n;i++){const sk=new Set([pickW(r,ROLES,WEIGHTS)]);if(r()<.4)sk.add(pickW(r,ROLES,WEIGHTS));
+  out.push({id:i,name:NAMES[i%NAMES.length]+" "+String.fromCharCode(65+Math.floor(i/NAMES.length))+".",branch:BRANCHES[Math.floor(r()*BRANCHES.length)],year:1+Math.floor(r()*4),
+  skills:sk,interests:new Set(sample(r,INTERESTS,2)),slots:new Set(sample(r,DAYS,3)),rating:Math.round((3+r()*2)*10)/10,color:GRADS[i%GRADS.length]})}return out}
+const union=s=>s.reduce((a,x)=>{x.forEach(v=>a.add(v));return a},new Set());
+const jac=(a,b)=>{const u=new Set([...a,...b]);if(!u.size)return 0;let i=0;a.forEach(x=>{if(b.has(x))i++});return i/u.size};
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+function parts(team,c){const cov=union(team.map(m=>m.skills));const nr=[...c.skills].filter(s=>!cov.has(s)).length/c.skills.size;
+  const it=mean(team.map(m=>jac(c.interests,m.interests))),av=mean(team.map(m=>jac(c.slots,m.slots)));
+  return{nr,it,av,rt:c.rating/5,total:.40*nr+.25*it+.20*av+.15*c.rating/5}}
+const score=(t,c)=>t.length?parts(t,c).total:c.rating;
+function buildTeams(students,size){const teams=Array.from({length:Math.floor(students.length/size)},()=>[]);const pool=students.slice();
+  const cnt=Object.fromEntries(CORE.map(r=>[r,pool.filter(s=>s.skills.has(r)).length]));
+  for(const role of CORE.slice().sort((a,b)=>cnt[a]-cnt[b])){for(const t of teams){if(t.some(m=>m.skills.has(role)))continue;
+    const c=pool.filter(s=>s.skills.has(role));if(!c.length)break;const best=c.reduce((b,x)=>score(t,x)>score(t,b)?x:b);t.push(best);pool.splice(pool.indexOf(best),1)}}
+  for(const t of teams){while(t.length<size&&pool.length){const best=pool.reduce((b,x)=>score(t,x)>score(t,b)?x:b);t.push(best);pool.splice(pool.indexOf(best),1)}}
+  return teams}
+function randomTeams(st,size,seed){const s=sample(rng(seed*7+3),st,st.length),t=[];for(let i=0;i+size<=s.length;i+=size)t.push(s.slice(i,i+size));return t}
+function evaluate(teams){const cov=teams.map(t=>union(t.map(m=>m.skills)).size);const full=teams.map(t=>{const u=union(t.map(m=>m.skills));return CORE.every(r=>u.has(r))});
+  return{avg:mean(cov),pct:100*full.filter(Boolean).length/full.length}}
+let seed=7,students=makeStudents(60,seed);
+
+/* ================= helpers ================= */
+const $=id=>document.getElementById(id);
+const ini=n=>n.split(/[\s(]/).filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const avatar=(name,bg,size)=>`<div class="av" style="background:${bg}${size?`;width:${size}px;height:${size}px;font-size:${size*.34}px`:""}">${ini(name)}</div>`;
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2400)}
+function go(p){document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.p===p));document.querySelectorAll(".page").forEach(s=>s.classList.toggle("active",s.id===p));window.scrollTo(0,0);if(p==="profile")renderProfile();if(p==="dream")renderDream()}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>go(b.dataset.p));
+function openModal(id){$(id).classList.add("show")}
+function closeAll(){document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));$("drawer").classList.remove("show");$("scrim").classList.remove("show")}
+document.querySelectorAll(".modal").forEach(m=>m.onclick=e=>{if(e.target===m)closeAll()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeAll()});
+function confetti(){const c=["#E11D2A","#FF4D57","#F5A400","#12A150","#2563EB","#7C3AED"];for(let i=0;i<70;i++){const d=document.createElement("div");d.className="confetti";
+  d.style.left=Math.random()*100+"vw";d.style.background=c[i%c.length];d.style.animationDuration=(1.6+Math.random()*1.6)+"s";d.style.animationDelay=Math.random()*.4+"s";d.style.borderRadius=Math.random()<.5?"50%":"2px";
+  document.body.appendChild(d);setTimeout(()=>d.remove(),3800)}}
+function countUp(){document.querySelectorAll(".count").forEach(el=>{const to=+el.dataset.to;let v=0;const st=Math.max(1,Math.ceil(to/30));const iv=setInterval(()=>{v=Math.min(to,v+st);el.textContent=v;if(v>=to)clearInterval(iv)},28)})}
+
+/* ================= home ================= */
+function renderHome(){const top=students.slice().sort((a,b)=>b.rating-a.rating).slice(0,4);
+  $("talent").innerHTML=top.map(s=>`<div class="card lift tal" onclick="profile(${s.id})">${avatar(s.name,s.color)}<b>${s.name}</b><div class="muted">${s.branch} · Year ${s.year}</div>
+    <div style="margin:8px 0">${[...s.skills].map(x=>`<span class="chip red">${x}</span>`).join("")}</div><span class="stars">★</span> <b>${s.rating}</b></div>`).join("");
+  const target=new Date();target.setDate(target.getDate()+23);target.setHours(9,0,0,0);
+  const tick=()=>{let d=Math.max(0,target-new Date());const D=Math.floor(d/864e5),H=Math.floor(d/36e5)%24,M=Math.floor(d/6e4)%60,S=Math.floor(d/1e3)%60;
+    $("cdChip").textContent=`${D}d ${H}h ${M}m`;$("cd").innerHTML=[[D,"days"],[H,"hrs"],[M,"min"],[S,"sec"]].map(([v,l])=>`<div><b>${String(v).padStart(2,"0")}</b><small>${l}</small></div>`).join("")};tick();setInterval(tick,1000)}
+
+/* ================= find ================= */
+function toggles(el,items,on){$(el).innerHTML=items.map(x=>`<span class="toggle ${on.includes(x)?"on":""}" data-v="${x}">${x}</span>`).join("");
+  $(el).querySelectorAll(".toggle").forEach(t=>t.onclick=()=>{t.classList.toggle("on");renderTeam()})}
+const sel=el=>new Set([...$(el).querySelectorAll(".toggle.on")].map(t=>t.dataset.v));
+toggles("optSkills",ROLES,["Frontend","Backend","ML/AI"]);toggles("optInts",INTERESTS,["HealthTech","Smart Campus"]);toggles("optDays",DAYS,["Wed","Sat","Sun"]);
+let myTeam=[];
+function me(){return{skills:union([sel("optSkills"),...myTeam.map(m=>m.skills)]),interests:sel("optInts"),slots:sel("optDays")}}
+function findMates(anim){if(!sel("optSkills").size){toast("Pick at least one skill your team has");return}
+  if(anim){$("results").innerHTML=`<h2>Finding the best matches…</h2>`+'<div class="skel"></div>'.repeat(4);setTimeout(()=>findMates(false),650);return}
+  const m=me();const miss=ROLES.filter(r=>!m.skills.has(r));$("need").innerHTML=miss.length?`⚠️ Your team is missing <b>${miss.join(", ")}</b>`:"🎉 Your team covers every role!";
+  const ranked=students.filter(s=>!myTeam.includes(s)).map(c=>({c,p:parts([m],c)})).sort((a,b)=>b.p.total-a.p.total).slice(0,8);
+  $("results").innerHTML=`<h2>Top matches for your team</h2>`+ranked.map(({c,p},i)=>`
+   <div class="card cand" id="cand${c.id}" style="animation-delay:${i*.05}s">
+     ${avatar(c.name,c.color)}
+     <div>
+       <div class="name">${c.name} ${i===0?'<span class="chip green">⭐ Best match</span>':""}</div>
+       <div class="meta"><span class="online"></span>${c.branch} · Year ${c.year} · <span class="stars">★</span> ${c.rating} · free ${[...c.slots].join(", ")}</div>
+       ${[...c.skills].map(s=>m.skills.has(s)?`<span class="chip">${s}</span>`:`<span class="chip green">＋ ${s}</span>`).join("")}
+       ${[...c.interests].map(s=>`<span class="chip red">${s}</span>`).join("")}
+       <div style="margin-top:7px"><span class="link" onclick="this.closest('.cand').classList.toggle('open')">Why this match? ▾</span></div>
+     </div>
+     <div style="display:flex;gap:16px;align-items:center">
+       <div class="ring" data-p="${Math.round(p.total*100)}"><span>${Math.round(p.total*100)}%</span></div>
+       <div class="actions">
+         <button class="btn sm" onclick="invite(${c.id},this)">Invite to team</button>
+         <button class="btn ghost sm" onclick="openChat('s${c.id}')">💬 Message</button>
+         <button class="btn ghost sm" onclick="profile(${c.id})">View profile</button>
+       </div>
+     </div>
+     <div class="why"><div class="bars">
+       <span>Brings new skills (40%)</span><div class="bar"><i style="width:${p.nr*100}%"></i></div><b>${Math.round(p.nr*100)}%</b>
+       <span>Shared interests (25%)</span><div class="bar"><i style="width:${p.it*100}%"></i></div><b>${Math.round(p.it*100)}%</b>
+       <span>Common free days (20%)</span><div class="bar"><i style="width:${p.av*100}%"></i></div><b>${Math.round(p.av*100)}%</b>
+       <span>Rating (15%)</span><div class="bar"><i style="width:${p.rt*100}%"></i></div><b>${Math.round(p.rt*100)}%</b>
+     </div></div>
+   </div>`).join("");
+  requestAnimationFrame(()=>document.querySelectorAll(".ring").forEach(r=>r.style.setProperty("--p",r.dataset.p)))}
+function invite(id,btn){const s=students[id];if(myTeam.length>=5){toast("Team is full (6 members)");return}
+  btn.textContent="Invite sent…";btn.disabled=true;toast(`Invite sent to ${s.name}`);
+  ensureConvo("s"+id);addMsg("s"+id,"me",`Hi ${s.name.split(" ")[0]}! We'd love to have you on our hackathon team 🙂`);
+  setTimeout(()=>{myTeam.push(s);addMsg("s"+id,"them","Sounds great, I'm in! 🙌");renderTeam();confetti();toast(`🎉 ${s.name} joined your team!`);findMates(false)},1500)}
+function renderTeam(){const m=me();$("teamCount").textContent=`(${myTeam.length+1}/6)`;
+  $("teamList").innerHTML=`<div class="mem">${avatar("You","var(--lime);color:#0A0C10",36)}<div><b>You</b><div class="muted">${[...sel("optSkills")].join(", ")||"–"}</div></div></div>`+
+   myTeam.map(s=>`<div class="mem">${avatar(s.name,s.color,36)}<div><b>${s.name}</b><div class="muted">${[...s.skills].join(", ")}</div></div></div>`).join("");
+  const have=ROLES.filter(r=>m.skills.has(r)),pct=Math.round(100*have.length/ROLES.length);$("covBar").style.width=pct+"%";$("covPct").textContent=pct+"%";
+  $("covChips").innerHTML=ROLES.map(r=>`<span class="chip ${m.skills.has(r)?"green":""}">${m.skills.has(r)?"✓":"○"} ${r}</span>`).join("")}
+function profile(id){const s=students[id];$("profBody").className="card";$("profBody").innerHTML=`
+  <div style="display:flex;gap:14px;align-items:center">${avatar(s.name,s.color,62)}<div><h2 style="margin:0">${s.name}</h2><div class="muted"><span class="online"></span>${s.branch} · Year ${s.year}</div></div><button class="x" onclick="closeAll()">×</button></div>
+  <div style="margin:18px 0 6px"><b>Skills</b></div>${[...s.skills].map(x=>`<span class="chip green">${x}</span>`).join("")}
+  <div style="margin:14px 0 6px"><b>Interests</b></div>${[...s.interests].map(x=>`<span class="chip red">${x}</span>`).join("")}
+  <div style="margin:14px 0 6px"><b>Free on</b></div>${[...s.slots].map(x=>`<span class="chip">${x}</span>`).join("")}
+  <div style="margin:16px 0"><b>Reputation</b> <span class="stars">${"★".repeat(Math.round(s.rating))}${"☆".repeat(5-Math.round(s.rating))}</span> ${s.rating} / 5</div>
+  <button class="btn" onclick="closeAll();openChat('s${s.id}')">💬 Message ${s.name.split(" ")[0]}</button>`;openModal("profModal")}
+
+/* ================= auto build ================= */
+let lastCrew=[],lastRand=[],view="crew";
+function kpis(a,b,label){$("kpis").innerHTML=`
+  <div class="card kpi lose"><b>${b.pct.toFixed(1)}%</b><span class="muted">Random teams with all 4 core roles</span></div>
+  <div class="card kpi win"><b>${a.pct.toFixed(1)}%</b><span class="muted">CampusCrew teams with all 4 core roles</span></div>
+  <div class="card kpi lose"><b>${b.avg.toFixed(2)}</b><span class="muted">Avg roles per team – random</span></div>
+  <div class="card kpi win"><b>${a.avg.toFixed(2)}</b><span class="muted">Avg roles per team – CampusCrew</span></div>`;$("autoNote").innerHTML=`<div class="note">${label}</div>`}
+function teamCard(t,i,lbl){const u=union(t.map(m=>m.skills)),full=CORE.every(r=>u.has(r));
+  return`<div class="card team ${full?"full":""}" style="animation-delay:${i*.04}s"><div class="hd"><span>${lbl} ${i+1}</span>${full?'<span class="chip green">✓ Complete</span>':`<span class="chip amber">Missing ${CORE.filter(r=>!u.has(r)).length}</span>`}</div>
+   ${t.map(m=>`<div class="row"><span>${m.name}</span><span>${[...m.skills].map(s=>s.split("/")[0]).join(", ")}</span></div>`).join("")}</div>`}
+function renderTeams(){$("sw").style.display="inline-flex";$("sw").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  $("teamsGrid").innerHTML=(view==="crew"?lastCrew:lastRand).map((t,i)=>teamCard(t,i,view==="crew"?"Team":"Group")).join("")}
+$("sw").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=b.dataset.v;renderTeams()});
+function scarce(){return CORE.map(r=>[r,students.filter(s=>s.skills.has(r)).length]).sort((a,b)=>a[1]-b[1]).map(([r,n])=>`${r}: ${n}`).join(" · ")}
+function runAuto(){lastCrew=buildTeams(students,6);lastRand=randomTeams(students,6,seed);
+  kpis(evaluate(lastCrew),evaluate(lastRand),`This batch (#${seed}) · students per core role → ${scarce()}. Few designers/pitchers limits how many teams can be complete.`);renderTeams()}
+function newBatch(){seed++;students=makeStudents(60,seed);myTeam=[];renderTeam();renderHome();runAuto();toast("New batch of 60 sample students")}
+function runMany(){const A=[],B=[];let wins=0;for(let s=1;s<=20;s++){const st=makeStudents(60,s),a=evaluate(buildTeams(st,6)),b=evaluate(randomTeams(st,6,s));A.push(a);B.push(b);if(a.pct>b.pct)wins++}
+  const m=X=>({pct:mean(X.map(x=>x.pct)),avg:mean(X.map(x=>x.avg))});kpis(m(A),m(B),`Average over 20 batches of 60 sample students · CampusCrew beat random grouping in <b>${wins} of 20</b> batches.`);
+  $("sw").style.display="none";$("teamsGrid").innerHTML=""}
+
+/* ================= services ================= */
+const CATS={"Photography":["📸","#1A1712"],"Design":["🎨","#18141F"],"Video Editing":["🎬","#11171F"],"Tutoring":["📚","#111A15"],"Web Development":["💻","#13151F"],"Resume Review":["📄","#1A1912"],"Content Writing":["✍️","#1A1218"]};
+const PROVIDERS={
+ Kabir:{branch:"B.Des · 3rd year",bio:"Event & portrait photographer. Shot 15+ college fests and club events.",jobs:23,resp:"~1 hr",since:"Jan 2026",work:["CampusFest night shots","Club portraits","Hackathon aftermovie stills"],reviews:[["Ananya","★★★★★","Great photos, delivered in 2 days!"],["Rohan","★★★★☆","Good quality, a bit late for one event."]]},
+ Ananya:{branch:"B.Des · 2nd year",bio:"Poster, logo and social-media designer. Loves bold, clean layouts.",jobs:17,resp:"~3 hrs",since:"Mar 2026",work:["Coding club logo","TechWeek poster","Insta carousel set"],reviews:[["Kabir","★★★★★","Logo looked super professional."],["Isha","★★★★☆","Quick changes, very friendly."]]},
+ Yash:{branch:"BBA · 2nd year",bio:"Edits reels and aftermovies in Premiere Pro & CapCut.",jobs:12,resp:"~2 hrs",since:"Feb 2026",work:["Fest aftermovie","Project demo video","Club reel series"],reviews:[["Meera","★★★★★","Our demo video looked amazing."],["Dev","★★★★☆","Good edits, needed 1 revision."]]},
+ Meera:{branch:"CSE · 4th year",bio:"Placed at a product company. Teaches DSA to juniors on weekends.",jobs:31,resp:"~30 min",since:"Aug 2025",work:["Arrays & strings batch","Graphs crash course","Mock interview sessions"],reviews:[["Kunal","★★★★★","Explained recursion really well!"],["Sneha","★★★★★","Best DSA sessions on campus."]]},
+ Rohan:{branch:"CSE · 4th year",bio:"Reviewed 40+ resumes before placement season. ATS-friendly tips.",jobs:40,resp:"~1 day",since:"Jul 2025",work:["Resume template","ATS checklist","LinkedIn tips"],reviews:[["Varun","★★★★★","Got 2 shortlists after the changes."],["Pooja","★★★★☆","Very detailed feedback."]]},
+ Isha:{branch:"IT · 3rd year",bio:"Builds portfolio sites with React. Mobile-friendly and fast.",jobs:9,resp:"~4 hrs",since:"Apr 2026",work:["Design portfolio","Photographer site","Developer resume site"],reviews:[["Ananya","★★★★★","My portfolio looks so clean now."],["Harsh","★★★★☆","Good work, small delay."]]},
+ Sana:{branch:"BBA · 3rd year",bio:"Proofreads reports and SOPs for grammar and formatting.",jobs:14,resp:"~2 hrs",since:"May 2026",work:["Project report check","SOP proofreading","Formatting fixes"],reviews:[["Aditya","★★★★☆","Caught lots of small mistakes."],["Neha","★★★★★","Report formatting was perfect."]]}};
+function provInfo(s){const first=s.name.split(" (")[0].split(" ")[0];const p=PROVIDERS[first];
+  return p?{first,...p}:{first,branch:(s.name.match(/\((.*)\)/)||[,"Student"])[1],bio:"New on CampusCrew – no reviews yet.",jobs:0,resp:"–",since:"Today",work:[],reviews:[]}}
+function viewProvider(key){const s=svcs.find(x=>x.key===key),p=provInfo(s);const others=svcs.filter(x=>x.key!==key&&x.name.split(" (")[0]===s.name.split(" (")[0]);
+  $("profBody").className="card wide";
+  $("profBody").innerHTML=`<div class="pv-hd">${avatar(s.name,"#2A3240;color:#C6F432",64)}<div><h2 style="margin:0">${s.name.split(" (")[0]}</h2><div class="muted"><span class="online"></span>${p.branch} · on CampusCrew since ${p.since}</div>
+     <div style="margin-top:6px">${s.rating?`<span class="stars">★</span> <b>${s.rating}</b> <span class="muted">(${s.reviews} reviews)</span>`:'<span class="chip green">New provider</span>'} <span class="chip green">✓ College email verified</span></div></div><button class="x" onclick="closeAll()">×</button></div>
+   <p style="color:var(--ink2);line-height:1.5;margin:16px 0 0">${p.bio}</p>
+   <div class="pv-stats"><div><b>${p.jobs}</b><span class="muted">jobs done</span></div><div><b>${p.resp}</b><span class="muted">replies in</span></div><div><b>${s.rating||"–"}</b><span class="muted">rating</span></div></div>
+   ${p.work.length?`<h3 style="margin:0">Work samples</h3><div class="pv-work">${p.work.map(w=>`<div>${CATS[s.cat][0]}<br>${w}</div>`).join("")}</div>`:""}
+   <h3 style="margin:0 0 4px">Services offered</h3>
+   <div style="margin-bottom:14px">${[s,...others].map(o=>`<span class="chip red">${o.title} · ${priceLabel(o)}</span>`).join("")}</div>
+   <h3 style="margin:0 0 4px">Recent reviews</h3>
+   ${p.reviews.length?p.reviews.map(r=>`<div class="pv-rev"><span class="stars">${r[1]}</span> <b>${r[0]}</b><div>${r[2]}</div></div>`).join(""):'<p class="muted">No reviews yet – be the first to book!</p>'}
+   <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn" onclick="closeAll();book('${key}')">Book ${s.title}</button><button class="btn ghost" onclick="closeAll();openChat('${key}')">💬 Message ${p.first}</button></div>`;
+  openModal("profModal")}
+const SEED=[
+ {title:"Event Photography",cat:"Photography",name:"Kabir (B.Des, 3rd yr)",type:"Negotiable",amt:300,desc:"Fests, club events and portraits. Edited photos delivered in 2 days.",rating:4.8,reviews:23},
+ {title:"Poster & Logo Design",cat:"Design",name:"Ananya (B.Des, 2nd yr)",type:"Starting from",amt:100,desc:"Event posters, club logos and social media creatives.",rating:4.6,reviews:17},
+ {title:"Reels & Video Editing",cat:"Video Editing",name:"Yash (BBA, 2nd yr)",type:"Negotiable",amt:200,desc:"Instagram reels, project demo videos and aftermovies.",rating:4.7,reviews:12},
+ {title:"DSA Tutoring",cat:"Tutoring",name:"Meera (CSE, 4th yr)",type:"Skill swap",amt:0,desc:"Arrays to DP – weekend sessions. Teach me design in return!",rating:4.9,reviews:31},
+ {title:"Resume Review",cat:"Resume Review",name:"Rohan (CSE, 4th yr)",type:"Free",amt:0,desc:"ATS-friendly resume feedback before placement season.",rating:4.5,reviews:40},
+ {title:"Portfolio Website",cat:"Web Development",name:"Isha (IT, 3rd yr)",type:"Starting from",amt:400,desc:"Personal portfolio site with your projects and resume.",rating:4.6,reviews:9},
+ {title:"Report Proofreading",cat:"Content Writing",name:"Sana (BBA, 3rd yr)",type:"Negotiable",amt:100,desc:"Grammar and formatting check for project reports.",rating:4.4,reviews:14}];
+const PAID=s=>!["Free","Skill swap"].includes(s.type);
+const priceLabel=s=>!PAID(s)?s.type:(s.type==="Starting from"?`From ₹${s.amt}`:`₹${s.amt}`);
+const priceTag=s=>!PAID(s)?`<span class="chip green">${s.type==="Free"?"🎁 Free":"🔁 Skill swap"}</span>`:s.type==="Negotiable"?`<span class="chip amber">🤝 Negotiable</span>`:s.type==="Starting from"?`<span class="chip">📈 Starting price</span>`:`<span class="chip">🔒 Fixed</span>`;
+let svcs=JSON.parse(localStorage.getItem("cc4_svcs")||"null")||SEED;svcs.forEach((s,i)=>s.key=s.key||("v"+i));
+let cat="";
+$("fCat").innerHTML=Object.keys(CATS).map(c=>`<option>${c}</option>`).join("");
+function renderCats(){$("catChips").innerHTML=["All",...Object.keys(CATS)].map(c=>`<span class="toggle ${(c==="All"&&!cat)||c===cat?"on":""}" onclick="cat='${c==="All"?"":c}';renderCats();renderSvcs()">${c==="All"?"✨ All":CATS[c][0]+" "+c}</span>`).join("")}
+function renderSvcs(){const q=$("q").value.toLowerCase();$("hsServices").dataset.to=svcs.length;
+  const list=svcs.filter(s=>(!cat||s.cat===cat)&&(s.title+s.desc+s.name+s.cat).toLowerCase().includes(q));
+  $("svcs").innerHTML=list.map(s=>`<div class="card svc lift"><div class="cover" style="background:${CATS[s.cat][1]}">${CATS[s.cat][0]}<span class="price">${priceLabel(s)}</span></div><div class="body">
+    <div><span class="chip red">${s.cat}</span>${priceTag(s)}</div><div class="t">${s.title}</div><div class="d">${s.desc||""}</div>
+    <div class="by"><button class="by-btn" onclick="viewProvider('${s.key}')" title="View provider profile">${avatar(s.name,"#2A3240;color:#C6F432",28)}<span>${s.name.split(" (")[0]} · ${s.name.match(/\((.*)\)/)?s.name.match(/\((.*)\)/)[1]:""}</span></button><button class="link" style="background:none;border:0;margin-left:auto;padding:0" onclick="viewProvider('${s.key}')">Profile →</button></div>
+    <div class="foot"><span class="muted">${s.rating?`<span class="stars">★</span> <b style="color:var(--ink)">${s.rating}</b> (${s.reviews})`:'<span class="chip green">New</span>'}</span>
+      <div style="display:flex;gap:6px"><button class="btn ghost sm" onclick="openChat('${s.key}')">💬</button><button class="btn sm" onclick="book('${s.key}')">Book</button></div></div>
+  </div></div>`).join("")||`<p class="muted">No services found.</p>`}
+function addService(){const s={title:$("fTitle").value.trim(),cat:$("fCat").value,name:$("fName").value.trim(),type:$("fType").value,amt:Math.max(0,+$("fAmt").value||0),desc:$("fDesc").value.trim(),rating:null,key:"v"+Date.now()};
+  if(!s.title||!s.name){toast("Add a title and your name");return}
+  if(PAID(s)&&!s.amt){toast("Enter your price, or choose Free / Skill swap");return}
+  if(/(write|writing|do|complete)\s+(my|your|their|the)?\s*assignments?|assignment\s+writing/i.test(s.title+" "+s.desc)){toast("⚠️ Not allowed: ghost-writing assignments (integrity policy)");return}
+  svcs.unshift(s);localStorage.setItem("cc4_svcs",JSON.stringify(svcs));renderSvcs();closeAll();["fTitle","fName","fAmt","fDesc"].forEach(i=>$(i).value="");confetti();toast("✅ Your service is live!")}
+let booking=null;
+function book(key){const s=booking=svcs.find(x=>x.key===key);const pi=provInfo(s);$("bProv").innerHTML=`<div class="bk-prov">${avatar(s.name,"#2A3240;color:#C6F432",44)}<div style="flex:1"><b>${s.name.split(" (")[0]}</b><div class="muted">${pi.branch} · ${s.rating?"★ "+s.rating+" ("+s.reviews+")":"New"} · ${pi.jobs} jobs · replies ${pi.resp}</div></div><button class="btn ghost sm" onclick="closeAll();viewProvider('${key}')">View profile</button></div>`;$("bTitle").textContent="Book: "+s.title;
+  $("bBy").textContent=`by ${s.name} · ${priceLabel(s)}${s.type==="Negotiable"?" (negotiable)":""}`;
+  $("offerField").style.display=PAID(s)&&s.type!=="Fixed"?"block":"none";$("bOffer").value=PAID(s)?Math.round(s.amt*(s.type==="Negotiable"?0.8:1)):"";
+  $("bDate").value=new Date(Date.now()+3*864e5).toISOString().slice(0,10);$("bNote").value="";openModal("bookModal")}
+function confirmBooking(){const s=booking,offer=+$("bOffer").value||0,canOffer=PAID(s)&&s.type!=="Fixed";closeAll();ensureConvo(s.key);
+  addMsg(s.key,"me",`Hi! I'd like to book "${s.title}" for ${$("bDate").value}.${canOffer?` My offer: ₹${offer}.`:""} ${$("bNote").value}`.trim());
+  toast("📩 Booking request sent to "+s.name.split(" (")[0]);
+  let reply="Thanks for the request! I'm available on that date – let's confirm the details here 😊";
+  if(s.type==="Skill swap")reply="Happy to swap skills! What can you teach me in return? 😊";
+  else if(canOffer&&offer<s.amt){const counter=Math.round((offer+s.amt)/2/10)*10;reply=`Thanks! ₹${offer} is a bit low for me – can we meet in the middle at ₹${counter}? 🤝`}
+  else if(canOffer)reply=`Deal at ₹${offer}! I'm available on that date – see you then 👍`;
+  setTimeout(()=>addMsg(s.key,"them",reply),1600)}
+
+/* ================= events ================= */
+const EVS=[
+ {name:"CampusHack 2026 – internal round",d:"12",m:"DEC",size:"Team of 6",tags:["Smart Campus","HealthTech","EdTech"],need:"Frontend, Backend, Design, Pitch",bg:"#1A1214",e:"🏆"},
+ {name:"Design Sprint Challenge",d:"20",m:"DEC",size:"Team of 3",tags:["UI/UX"],need:"2 designers + 1 frontend",bg:"#16121F",e:"🎨"},
+ {name:"AgriTech Ideathon",d:"08",m:"JAN",size:"Team of 4",tags:["AgriTech","Sustainability"],need:"Research, ML/AI, Pitch",bg:"#101A15",e:"🌾"},
+ {name:"FinTech Build Weekend",d:"17",m:"JAN",size:"Team of 4",tags:["FinTech"],need:"Backend, Frontend, Pitch",bg:"#10151F",e:"💳"}];
+$("evs").innerHTML=EVS.map(e=>`<div class="card ev lift"><div class="banner" style="background:${e.bg}"><span style="font-size:30px">${e.e}</span><div class="date"><b>${e.d}</b><small>${e.m}</small></div></div><div class="body">
+  <h3 style="font-size:17px">${e.name}</h3><div class="muted">${e.size} · ideal mix: ${e.need}</div><div style="margin:10px 0 14px">${e.tags.map(t=>`<span class="chip red">${t}</span>`).join("")}</div>
+  <button class="btn sm" onclick="go('find')">🤝 Find teammates</button> <button class="btn ghost sm" onclick="this.textContent='✓ Registered';this.className='btn sm done';this.disabled=true;confetti();toast('Team registered for ${e.name}')">Register team</button></div></div>`).join("");
+
+/* ================= profile ================= */
+function renderProfile(){$("pTeam").textContent=8+myTeam.length;
+  const lv=[["Frontend",80,"Advanced"],["Backend",65,"Intermediate"],["ML/AI",45,"Beginner"],["Pitch/Presentation",55,"Intermediate"]];
+  $("skillBars").innerHTML=lv.map(([s,v,l])=>`<div class="skill"><span>${s}</span><div class="bar"><i style="width:${v}%"></i></div><span class="muted">${l}</span></div>`).join("")}
+
+/* ================= messages ================= */
+const convos={};let current=null;
+function who(key){if(key==="g1")return{name:"Dream Team (group)",color:"var(--lime);color:#0A0C10",sub:"You + "+myTeam.length+" members"};if(key.startsWith("s")){const s=students[+key.slice(1)];return{name:s.name,color:s.color,sub:`${s.branch} · ${[...s.skills].join(", ")}`}}
+  const v=svcs.find(x=>x.key===key);return{name:v.name.split(" (")[0],color:"linear-gradient(135deg,#9CA3AF,#4B5563)",sub:v.title}}
+function ensureConvo(key){if(!convos[key])convos[key]={msgs:[],unread:0,t:Date.now()}}
+function addMsg(key,from,text){ensureConvo(key);const c=convos[key];c.msgs.push({from,text,time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})});c.t=Date.now();
+  if(from==="them"&&!(current===key&&$("drawer").classList.contains("show")))c.unread++;renderConvos();if(current===key)renderChat()}
+function renderConvos(){const keys=Object.keys(convos).sort((a,b)=>convos[b].t-convos[a].t);
+  const un=keys.reduce((a,k)=>a+convos[k].unread,0);$("badge").style.display=un?"grid":"none";$("badge").textContent=un;
+  $("cvList").innerHTML=keys.map(k=>{const w=who(k),l=convos[k].msgs.slice(-1)[0];return`<div class="cv ${k===current?"on":""}" onclick="selectConvo('${k}')">${avatar(w.name,w.color)}<div><div class="nm">${w.name}</div><div class="last">${l?l.text:"Start a conversation"}</div></div>${convos[k].unread?'<span class="dot"></span>':""}</div>`}).join("")||`<p class="muted" style="padding:0 18px">No conversations yet.</p>`}
+function openChat(key){$("drawer").classList.add("show");$("scrim").classList.add("show");if(key){ensureConvo(key);selectConvo(key)}else renderConvos()}
+function selectConvo(key){current=key;convos[key].unread=0;renderConvos();renderChat();setTimeout(()=>{const i=$("msgIn");i&&i.focus()},60)}
+function renderChat(){const w=who(current),c=convos[current];$("chat").innerHTML=`
+  <div class="chat-hd">${avatar(w.name,w.color)}<div><b>${w.name}</b><div class="muted"><span class="online"></span>Online · ${w.sub}</div></div><button class="x" onclick="closeAll()">×</button></div>
+  <div class="msgs" id="msgs">${c.msgs.length?c.msgs.map(m=>`<div class="msg ${m.from}">${esc(m.text)}<small>${m.time}</small></div>`).join(""):'<div class="empty">Say hi 👋</div>'}</div>
+  <div class="typing" id="typing"></div>
+  <div class="quick"><span>Are you free this weekend?</span><span>Can we discuss the idea?</span><span>What's your rate?</span></div>
+  <div class="compose"><input id="msgIn" placeholder="Type a message…" onkeydown="if(event.key==='Enter')send()"><button class="btn" onclick="send()">Send ➤</button></div>`;
+  $("chat").querySelectorAll(".quick span").forEach(q=>q.onclick=()=>{$("msgIn").value=q.textContent;send()});const m=$("msgs");m.scrollTop=m.scrollHeight}
+const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const REPLIES=["Sure! Let's catch up after class 🙂","Yes, I'm free on the weekend.","Sounds interesting – tell me more about the idea!","Happy to help. Shall we meet in the library?","Great, I'll share my portfolio here."];
+function send(){const i=$("msgIn"),t=i.value.trim();if(!t)return;const k=current;addMsg(k,"me",t);i.value="";$("msgIn").focus();
+  setTimeout(()=>{if(current===k&&$("typing"))$("typing").textContent=who(k).name.split(" ")[0]+" is typing…"},400);
+  setTimeout(()=>{addMsg(k,"them",REPLIES[Math.floor(Math.random()*REPLIES.length)]);if($("typing"))$("typing").textContent=""},1700)}
+ensureConvo("s3");convos["s3"].msgs.push({from:"them",text:"Hey! Saw you're forming a team for CampusHack – I'd love to join 🙌",time:"10:12"});convos["s3"].unread=1;
+
+
+/* ================= AI dream team ================= */
+let dream=[],dreamInvited=false;
+function buildDream(regen){const m=me();const base={skills:m.skills,interests:m.interests,slots:m.slots};let pool=students.filter(s=>!myTeam.includes(s));const team=[base,...myTeam];const picks=[];
+  while(team.length<6&&pool.length){const ranked=pool.map(c=>({c,s:parts(team,c).total})).sort((a,b)=>b.s-a.s);const k=regen?Math.min(3,ranked.length):1;const pick=ranked[Math.floor(Math.random()*k)].c;team.push(pick);picks.push(pick);pool=pool.filter(x=>x!==pick)}
+  dream=picks;dreamInvited=false;$("inviteAllBtn").disabled=false;$("inviteAllBtn").textContent=`Invite all ${picks.length}`;renderDream(team);if(regen)toast("✦ New dream team generated")}
+function renderDream(team){const all=team||[{skills:me().skills,interests:me().interests,slots:me().slots},...myTeam,...dream];
+  const cover=ROLES.map(r=>({r,n:all.filter(x=>x.skills.has(r)).length}));const covPct=cover.filter(c=>c.n>0).length/ROLES.length;
+  const others=all.slice(1);const intr=others.length?mean(others.map(c=>jac(c.interests,all[0].interests))):0;const avail=others.length?mean(others.map(c=>jac(c.slots,all[0].slots))):0;const rate=others.length?mean(others.map(c=>c.rating))/5:0;
+  const strength=Math.round(100*(.55*covPct+.15*intr+.15*avail+.15*rate));
+  const freeWknd=others.filter(c=>c.slots.has("Sat")||c.slots.has("Sun")).length;
+  $("dreamLine").textContent=`Covers ${cover.filter(c=>c.n>0).length} of 6 roles · ${freeWknd} of ${others.length} free on weekends`;
+  animateNum($("dreamScore"),strength);
+  $("dreamGrid").innerHTML=`<div class="dm"><div style="display:flex;align-items:center;gap:12px">${avatar("You","var(--lime);color:#0A0C10")}<div><b>You</b><div class="muted">Team leader</div></div></div><div class="role">${[...sel("optSkills")].map(x=>x.split("/")[0].toLowerCase()).join(" · ")||"–"}</div></div>`+
+    others.map((s,i)=>`<div class="dm" style="animation-delay:${i*.06}s"><div style="display:flex;align-items:center;gap:12px">${avatar(s.name,s.color)}<div><b>${s.name}</b><div class="muted">${s.branch} · Year ${s.year} · <span class="stars">★</span>${s.rating}</div></div></div><div class="role">${[...s.skills].map(x=>x.split("/")[0].toLowerCase()).join(" · ")}</div></div>`).join("");
+  $("dreamCov").innerHTML=cover.map(c=>{const v=Math.min(100,c.n*60+(c.n?40:0));return`<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>${c.r}</span><span class="mono muted">${c.n?c.n+" member"+(c.n>1?"s":""):"missing"}</span></div><div class="bar"><i style="width:${c.n?Math.min(100,40+c.n*30):4}%;${c.n?"":"background:var(--red)"}"></i></div></div>`}).join("");
+  $("dreamWhy").innerHTML=[["Role coverage (55%)",covPct],["Shared interests (15%)",intr],["Common free days (15%)",avail],["Avg. rating (15%)",rate]].map(([l,v])=>`<span>${l}<div class="bar" style="margin-top:6px"><i style="width:${Math.round(v*100)}%"></i></div></span><b style="text-align:right">${Math.round(v*100)}%</b>`).join("")}
+function animateNum(el,to){let v=0;clearInterval(el._i);el._i=setInterval(()=>{v=Math.min(to,v+3);el.textContent=v;if(v>=to)clearInterval(el._i)},18)}
+function inviteAll(){if(dreamInvited)return;dreamInvited=true;const b=$("inviteAllBtn");b.disabled=true;b.textContent="Invites sent…";
+  dream.forEach((s,i)=>{ensureConvo("s"+s.id);addMsg("s"+s.id,"me",`Hi ${s.name.split(" ")[0]}! Want to join our CampusHack dream team? 🚀`)});
+  setTimeout(()=>{dream.forEach(s=>{if(!myTeam.includes(s)&&myTeam.length<5)myTeam.push(s);addMsg("s"+s.id,"them","I'm in! Let's build something cool 🙌")});dream=[];renderTeam();renderDream();b.textContent="✓ Everyone joined";confetti();toast("🎉 Your dream team is complete!")},1600)}
+function groupChat(){const key="g1";if(!convos[key]){ensureConvo(key);convos[key].msgs.push({from:"them",text:"Team chat created – say hi to your crew! 👋",time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})})}openChat(key)}
+
+renderHome();countUp();renderTeam();renderCats();renderSvcs();renderConvos();findMates(false);renderProfile();
+
+/* URL params for quick demo / screenshots: ?page=dream  &demo=invite|chat|auto */
+(function(){const q=new URLSearchParams(location.search),pg=q.get("page"),d=q.get("demo");if(pg)go(pg);
+  if(d==="auto"){go("auto");runAuto()}
+  if(d==="provider"){go("services");viewProvider("v0")}
+  if(d==="book"){go("services");book("v0")}
+  if(d==="chat"){$("drawer").style.transition="none";document.querySelectorAll(".page").forEach(x=>x.style.animation="none");go("services");book("v0");$("bOffer").value=200;confirmBooking();setTimeout(()=>openChat("v0"),1900)}
+  if(d==="match"){go("find");const s=students.find(x=>x.skills.has("UI/UX Design"));invite(s.id,document.createElement("button"))}
+})();
+</script>
+</body>
+</html>
