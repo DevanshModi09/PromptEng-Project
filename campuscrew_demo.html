@@ -238,7 +238,7 @@
         <div class="opt-group"><h4>Skills your team already has</h4><div id="optSkills"></div></div>
         <div class="opt-group"><h4>Your interests</h4><div id="optInts"></div></div>
         <div class="opt-group"><h4>Days you're free</h4><div id="optDays"></div></div>
-        <button class="btn" style="width:100%;justify-content:center" onclick="findMates(true)">🔍 Find best matches</button>
+        <button class="btn" style="width:100%;justify-content:center" onclick="findMates(true)">Find best matches</button>
         <div class="need" id="need"></div>
       </div>
       <div id="results"></div>
@@ -256,9 +256,11 @@
   <section class="page" id="auto">
     <h1>Auto-Build Teams</h1>
     <p class="sub">Forms teams of 6 from 60 sample students and compares random grouping (like friend groups) with CampusCrew matching. Core roles: Frontend, Backend, UI/UX Design, Pitch.</p>
-    <button class="btn" onclick="runAuto()">⚙️ Build teams for this batch</button>
-    <button class="btn ghost" onclick="newBatch()">🔄 New batch of students</button>
-    <button class="btn ghost" onclick="runMany()">📊 Average over 20 batches</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+      <button class="btn" onclick="runAuto()">Build teams for this batch</button>
+      <button class="btn ghost" onclick="newBatch()">New batch of students</button>
+      <button class="btn ghost" onclick="runMany()">Average over 20 batches</button>
+    </div>
     <div class="kpis" id="kpis"></div>
     <div id="autoNote"></div>
     <div class="switch" id="sw" style="display:none"><button class="on" data-v="crew">CampusCrew teams</button><button data-v="rand">Random teams</button></div>
@@ -267,11 +269,11 @@
 
   <!-- SERVICES -->
   <section class="page" id="services">
-    <h1>Skill Services</h1>
+    <h1>Skill Services <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--green);font-family:var(--mono);vertical-align:middle"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);display:inline-block"></span>Live</span></h1>
     <p class="sub">Talent from your own campus – book it, or list your own skill.</p>
     <div class="svc-top">
       <input class="search" id="q" placeholder="Search photography, design, tutoring…" oninput="renderSvcs()">
-      <button class="btn" onclick="openModal('listModal')">＋ List your service</button>
+      <button class="btn" style="width:100%;justify-content:center" onclick="openModal('listModal')">List your service</button>
     </div>
     <div id="catChips" style="margin-bottom:18px"></div>
     <div class="svcs" id="svcs"></div>
@@ -323,7 +325,7 @@
 <div class="scrim" id="scrim" onclick="closeAll()"></div>
 <div class="drawer" id="drawer">
   <div class="convos"><h3>Messages</h3><div id="cvList"></div></div>
-  <div class="chat" id="chat"><div class="empty">💬<br>Select a conversation, or press “Message” on any student or service.</div></div>
+  <div class="chat" id="chat"><div class="empty">Select a conversation or message any student</div></div>
 </div>
 
 <div class="modal" id="listModal"><div class="card">
@@ -419,15 +421,15 @@ let myTeam=[];
 function me(){return{skills:union([sel("optSkills"),...myTeam.map(m=>m.skills)]),interests:sel("optInts"),slots:sel("optDays")}}
 function findMates(anim){if(!sel("optSkills").size){toast("Pick at least one skill your team has");return}
   if(anim){$("results").innerHTML=`<h2>Finding the best matches…</h2>`+'<div class="skel"></div>'.repeat(4);setTimeout(()=>findMates(false),650);return}
-  const m=me();const miss=ROLES.filter(r=>!m.skills.has(r));$("need").innerHTML=miss.length?`⚠️ Your team is missing <b>${miss.join(", ")}</b>`:"🎉 Your team covers every role!";
+  const m=me();const miss=ROLES.filter(r=>!m.skills.has(r));$("need").innerHTML=miss.length?`⚠️ Your team is missing <b>${miss.join(", ")}</b>`:"Your team covers every role!";
   const ranked=students.filter(s=>!myTeam.includes(s)).map(c=>({c,p:parts([m],c)})).sort((a,b)=>b.p.total-a.p.total).slice(0,8);
   $("results").innerHTML=`<h2>Top matches for your team</h2>`+ranked.map(({c,p},i)=>`
    <div class="card cand" id="cand${c.id}" style="animation-delay:${i*.05}s">
      ${avatar(c.name,c.color)}
      <div>
-       <div class="name">${c.name} ${i===0?'<span class="chip green">⭐ Best match</span>':""}</div>
+       <div class="name">${c.name} ${i===0?'<span class="chip green">Best match</span>':""}</div>
        <div class="meta"><span class="online"></span>${c.branch} · Year ${c.year} · <span class="stars">★</span> ${c.rating} · free ${[...c.slots].join(", ")}</div>
-       ${[...c.skills].map(s=>m.skills.has(s)?`<span class="chip">${s}</span>`:`<span class="chip green">＋ ${s}</span>`).join("")}
+       ${[...c.skills].map(s=>m.skills.has(s)?`<span class="chip">${s}</span>`:`<span class="chip green">+ ${s}</span>`).join("")}
        ${[...c.interests].map(s=>`<span class="chip red">${s}</span>`).join("")}
        <div style="margin-top:7px"><span class="link" onclick="this.closest('.cand').classList.toggle('open')">Why this match? ▾</span></div>
      </div>
@@ -435,7 +437,7 @@ function findMates(anim){if(!sel("optSkills").size){toast("Pick at least one ski
        <div class="ring" data-p="${Math.round(p.total*100)}"><span>${Math.round(p.total*100)}%</span></div>
        <div class="actions">
          <button class="btn sm" onclick="invite(${c.id},this)">Invite to team</button>
-         <button class="btn ghost sm" onclick="openChat('s${c.id}')">💬 Message</button>
+         <button class="btn ghost sm" onclick="openChat('s${c.id}')">Message</button>
          <button class="btn ghost sm" onclick="profile(${c.id})">View profile</button>
        </div>
      </div>
@@ -449,8 +451,8 @@ function findMates(anim){if(!sel("optSkills").size){toast("Pick at least one ski
   requestAnimationFrame(()=>document.querySelectorAll(".ring").forEach(r=>r.style.setProperty("--p",r.dataset.p)))}
 function invite(id,btn){const s=students[id];if(myTeam.length>=5){toast("Team is full (6 members)");return}
   btn.textContent="Invite sent…";btn.disabled=true;toast(`Invite sent to ${s.name}`);
-  ensureConvo("s"+id);addMsg("s"+id,"me",`Hi ${s.name.split(" ")[0]}! We'd love to have you on our hackathon team 🙂`);
-  setTimeout(()=>{myTeam.push(s);addMsg("s"+id,"them","Sounds great, I'm in! 🙌");renderTeam();confetti();toast(`🎉 ${s.name} joined your team!`);findMates(false)},1500)}
+  ensureConvo("s"+id);addMsg("s"+id,"me",`Hi ${s.name.split(" ")[0]}! We'd love to have you on our hackathon team.`);
+  setTimeout(()=>{myTeam.push(s);addMsg("s"+id,"them","Sounds great, I'm in!");renderTeam();confetti();toast(`${s.name} joined your team!`);findMates(false)},1500)}
 function renderTeam(){const m=me();$("teamCount").textContent=`(${myTeam.length+1}/6)`;
   $("teamList").innerHTML=`<div class="mem">${avatar("You","var(--lime);color:#0A0C10",36)}<div><b>You</b><div class="muted">${[...sel("optSkills")].join(", ")||"–"}</div></div></div>`+
    myTeam.map(s=>`<div class="mem">${avatar(s.name,s.color,36)}<div><b>${s.name}</b><div class="muted">${[...s.skills].join(", ")}</div></div></div>`).join("");
@@ -462,7 +464,7 @@ function profile(id){const s=students[id];$("profBody").className="card";$("prof
   <div style="margin:14px 0 6px"><b>Interests</b></div>${[...s.interests].map(x=>`<span class="chip red">${x}</span>`).join("")}
   <div style="margin:14px 0 6px"><b>Free on</b></div>${[...s.slots].map(x=>`<span class="chip">${x}</span>`).join("")}
   <div style="margin:16px 0"><b>Reputation</b> <span class="stars">${"★".repeat(Math.round(s.rating))}${"☆".repeat(5-Math.round(s.rating))}</span> ${s.rating} / 5</div>
-  <button class="btn" onclick="closeAll();openChat('s${s.id}')">💬 Message ${s.name.split(" ")[0]}</button>`;openModal("profModal")}
+  <button class="btn" onclick="closeAll();openChat('s${s.id}')">Message ${s.name.split(" ")[0]}</button>`;openModal("profModal")}
 
 /* ================= auto build ================= */
 let lastCrew=[],lastRand=[],view="crew";
@@ -508,7 +510,7 @@ function viewProvider(key){const s=svcs.find(x=>x.key===key),p=provInfo(s);const
    <div style="margin-bottom:14px">${[s,...others].map(o=>`<span class="chip red">${o.title} · ${priceLabel(o)}</span>`).join("")}</div>
    <h3 style="margin:0 0 4px">Recent reviews</h3>
    ${p.reviews.length?p.reviews.map(r=>`<div class="pv-rev"><span class="stars">${r[1]}</span> <b>${r[0]}</b><div>${r[2]}</div></div>`).join(""):'<p class="muted">No reviews yet – be the first to book!</p>'}
-   <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn" onclick="closeAll();book('${key}')">Book ${s.title}</button><button class="btn ghost" onclick="closeAll();openChat('${key}')">💬 Message ${p.first}</button></div>`;
+   <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn" onclick="closeAll();book('${key}')">Book ${s.title}</button><button class="btn ghost" onclick="closeAll();openChat('${key}')">Message ${p.first}</button></div>`;
   openModal("profModal")}
 const SEED=[
  {title:"Event Photography",cat:"Photography",name:"Kabir (B.Des, 3rd yr)",type:"Negotiable",amt:300,desc:"Fests, club events and portraits. Edited photos delivered in 2 days.",rating:4.8,reviews:23},
@@ -520,24 +522,31 @@ const SEED=[
  {title:"Report Proofreading",cat:"Content Writing",name:"Sana (BBA, 3rd yr)",type:"Negotiable",amt:100,desc:"Grammar and formatting check for project reports.",rating:4.4,reviews:14}];
 const PAID=s=>!["Free","Skill swap"].includes(s.type);
 const priceLabel=s=>!PAID(s)?s.type:(s.type==="Starting from"?`From ₹${s.amt}`:`₹${s.amt}`);
-const priceTag=s=>!PAID(s)?`<span class="chip green">${s.type==="Free"?"🎁 Free":"🔁 Skill swap"}</span>`:s.type==="Negotiable"?`<span class="chip amber">🤝 Negotiable</span>`:s.type==="Starting from"?`<span class="chip">📈 Starting price</span>`:`<span class="chip">🔒 Fixed</span>`;
-let svcs=JSON.parse(localStorage.getItem("cc4_svcs")||"null")||SEED;svcs.forEach((s,i)=>s.key=s.key||("v"+i));
+const priceTag=s=>!PAID(s)?`<span class="chip green">${s.type==="Free"?"Free":"Skill swap"}</span>`:s.type==="Negotiable"?`<span class="chip amber">Negotiable</span>`:s.type==="Starting from"?`<span class="chip">Starting price</span>`:`<span class="chip">Fixed</span>`;
+let svcs=[];
 let cat="";
 $("fCat").innerHTML=Object.keys(CATS).map(c=>`<option>${c}</option>`).join("");
-function renderCats(){$("catChips").innerHTML=["All",...Object.keys(CATS)].map(c=>`<span class="toggle ${(c==="All"&&!cat)||c===cat?"on":""}" onclick="cat='${c==="All"?"":c}';renderCats();renderSvcs()">${c==="All"?"✨ All":CATS[c][0]+" "+c}</span>`).join("")}
-function renderSvcs(){const q=$("q").value.toLowerCase();$("hsServices").dataset.to=svcs.length;
+function renderCats(){$("catChips").innerHTML=["All",...Object.keys(CATS)].map(c=>`<span class="toggle ${(c==="All"&&!cat)||c===cat?"on":""}" onclick="cat='${c==="All"?"":c}';renderCats();renderSvcs()">${c==="All"?"All":c}</span>`).join("")}
+function renderSvcs(){const q=$("q").value.toLowerCase();$("hsServices").dataset.to=svcs.length;$("hsServices").textContent=svcs.length;
   const list=svcs.filter(s=>(!cat||s.cat===cat)&&(s.title+s.desc+s.name+s.cat).toLowerCase().includes(q));
-  $("svcs").innerHTML=list.map(s=>`<div class="card svc lift"><div class="cover" style="background:${CATS[s.cat][1]}">${CATS[s.cat][0]}<span class="price">${priceLabel(s)}</span></div><div class="body">
+  $("svcs").innerHTML=list.map(s=>`<div class="card svc lift"><div class="cover" style="background:${CATS[s.cat]?CATS[s.cat][1]:"#111"}">${CATS[s.cat]?CATS[s.cat][0]:"🔧"}<span class="price">${priceLabel(s)}</span></div><div class="body">
     <div><span class="chip red">${s.cat}</span>${priceTag(s)}</div><div class="t">${s.title}</div><div class="d">${s.desc||""}</div>
     <div class="by"><button class="by-btn" onclick="viewProvider('${s.key}')" title="View provider profile">${avatar(s.name,"#2A3240;color:#C6F432",28)}<span>${s.name.split(" (")[0]} · ${s.name.match(/\((.*)\)/)?s.name.match(/\((.*)\)/)[1]:""}</span></button><button class="link" style="background:none;border:0;margin-left:auto;padding:0" onclick="viewProvider('${s.key}')">Profile →</button></div>
     <div class="foot"><span class="muted">${s.rating?`<span class="stars">★</span> <b style="color:var(--ink)">${s.rating}</b> (${s.reviews})`:'<span class="chip green">New</span>'}</span>
-      <div style="display:flex;gap:6px"><button class="btn ghost sm" onclick="openChat('${s.key}')">💬</button><button class="btn sm" onclick="book('${s.key}')">Book</button></div></div>
+      <div style="display:flex;gap:6px"><button class="btn ghost sm" onclick="openChat('${s.key}')">Chat</button><button class="btn sm" onclick="book('${s.key}')">Book</button></div></div>
   </div></div>`).join("")||`<p class="muted">No services found.</p>`}
-function addService(){const s={title:$("fTitle").value.trim(),cat:$("fCat").value,name:$("fName").value.trim(),type:$("fType").value,amt:Math.max(0,+$("fAmt").value||0),desc:$("fDesc").value.trim(),rating:null,key:"v"+Date.now()};
+async function loadSvcs(){
+  $("svcs").innerHTML='<div class="skel"></div>'.repeat(3);
+  try{const r=await fetch("/api/services");svcs=await r.json();renderSvcs();renderCats();}
+  catch(e){console.error("API unavailable, using seed",e);svcs=SEED;svcs.forEach((s,i)=>s.key=s.key||("v"+i));renderSvcs();renderCats();}}
+async function addService(){const s={title:$("fTitle").value.trim(),cat:$("fCat").value,name:$("fName").value.trim(),type:$("fType").value,amt:Math.max(0,+$("fAmt").value||0),desc:$("fDesc").value.trim()};
   if(!s.title||!s.name){toast("Add a title and your name");return}
   if(PAID(s)&&!s.amt){toast("Enter your price, or choose Free / Skill swap");return}
-  if(/(write|writing|do|complete)\s+(my|your|their|the)?\s*assignments?|assignment\s+writing/i.test(s.title+" "+s.desc)){toast("⚠️ Not allowed: ghost-writing assignments (integrity policy)");return}
-  svcs.unshift(s);localStorage.setItem("cc4_svcs",JSON.stringify(svcs));renderSvcs();closeAll();["fTitle","fName","fAmt","fDesc"].forEach(i=>$(i).value="");confetti();toast("✅ Your service is live!")}
+  if(/(write|writing|do|complete)\s+(my|your|their|the)?\s*assignments?|assignment\s+writing/i.test(s.title+" "+s.desc)){toast("Not allowed: ghost-writing assignments (integrity policy)");return}
+  try{
+    const r=await fetch("/api/services",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(s)});
+    const created=await r.json();svcs.unshift(created);renderSvcs();closeAll();["fTitle","fName","fAmt","fDesc"].forEach(i=>$(i).value="");confetti();toast("Your service is live!");
+  }catch(e){toast("Could not save – try again");}}
 let booking=null;
 function book(key){const s=booking=svcs.find(x=>x.key===key);const pi=provInfo(s);$("bProv").innerHTML=`<div class="bk-prov">${avatar(s.name,"#2A3240;color:#C6F432",44)}<div style="flex:1"><b>${s.name.split(" (")[0]}</b><div class="muted">${pi.branch} · ${s.rating?"★ "+s.rating+" ("+s.reviews+")":"New"} · ${pi.jobs} jobs · replies ${pi.resp}</div></div><button class="btn ghost sm" onclick="closeAll();viewProvider('${key}')">View profile</button></div>`;$("bTitle").textContent="Book: "+s.title;
   $("bBy").textContent=`by ${s.name} · ${priceLabel(s)}${s.type==="Negotiable"?" (negotiable)":""}`;
@@ -545,11 +554,11 @@ function book(key){const s=booking=svcs.find(x=>x.key===key);const pi=provInfo(s
   $("bDate").value=new Date(Date.now()+3*864e5).toISOString().slice(0,10);$("bNote").value="";openModal("bookModal")}
 function confirmBooking(){const s=booking,offer=+$("bOffer").value||0,canOffer=PAID(s)&&s.type!=="Fixed";closeAll();ensureConvo(s.key);
   addMsg(s.key,"me",`Hi! I'd like to book "${s.title}" for ${$("bDate").value}.${canOffer?` My offer: ₹${offer}.`:""} ${$("bNote").value}`.trim());
-  toast("📩 Booking request sent to "+s.name.split(" (")[0]);
-  let reply="Thanks for the request! I'm available on that date – let's confirm the details here 😊";
-  if(s.type==="Skill swap")reply="Happy to swap skills! What can you teach me in return? 😊";
-  else if(canOffer&&offer<s.amt){const counter=Math.round((offer+s.amt)/2/10)*10;reply=`Thanks! ₹${offer} is a bit low for me – can we meet in the middle at ₹${counter}? 🤝`}
-  else if(canOffer)reply=`Deal at ₹${offer}! I'm available on that date – see you then 👍`;
+  toast("Booking request sent to "+s.name.split(" (")[0]);
+  let reply="Thanks for the request! I'm available on that date – let's confirm the details here.";
+  if(s.type==="Skill swap")reply="Happy to swap skills! What can you teach me in return?";
+  else if(canOffer&&offer<s.amt){const counter=Math.round((offer+s.amt)/2/10)*10;reply=`Thanks! ₹${offer} is a bit low for me – can we meet in the middle at ₹${counter}?`}
+  else if(canOffer)reply=`Deal at ₹${offer}! I'm available on that date – see you then.`;
   setTimeout(()=>addMsg(s.key,"them",reply),1600)}
 
 /* ================= events ================= */
@@ -560,7 +569,7 @@ const EVS=[
  {name:"FinTech Build Weekend",d:"17",m:"JAN",size:"Team of 4",tags:["FinTech"],need:"Backend, Frontend, Pitch",bg:"#10151F",e:"💳"}];
 $("evs").innerHTML=EVS.map(e=>`<div class="card ev lift"><div class="banner" style="background:${e.bg}"><span style="font-size:30px">${e.e}</span><div class="date"><b>${e.d}</b><small>${e.m}</small></div></div><div class="body">
   <h3 style="font-size:17px">${e.name}</h3><div class="muted">${e.size} · ideal mix: ${e.need}</div><div style="margin:10px 0 14px">${e.tags.map(t=>`<span class="chip red">${t}</span>`).join("")}</div>
-  <button class="btn sm" onclick="go('find')">🤝 Find teammates</button> <button class="btn ghost sm" onclick="this.textContent='✓ Registered';this.className='btn sm done';this.disabled=true;confetti();toast('Team registered for ${e.name}')">Register team</button></div></div>`).join("");
+  <button class="btn sm" onclick="go('find')">Find teammates</button> <button class="btn ghost sm" onclick="this.textContent='Registered';this.className='btn sm done';this.disabled=true;confetti();toast('Team registered for ${e.name}')">Register team</button></div></div>`).join("");
 
 /* ================= profile ================= */
 function renderProfile(){$("pTeam").textContent=8+myTeam.length;
@@ -581,24 +590,24 @@ function openChat(key){$("drawer").classList.add("show");$("scrim").classList.ad
 function selectConvo(key){current=key;convos[key].unread=0;renderConvos();renderChat();setTimeout(()=>{const i=$("msgIn");i&&i.focus()},60)}
 function renderChat(){const w=who(current),c=convos[current];$("chat").innerHTML=`
   <div class="chat-hd">${avatar(w.name,w.color)}<div><b>${w.name}</b><div class="muted"><span class="online"></span>Online · ${w.sub}</div></div><button class="x" onclick="closeAll()">×</button></div>
-  <div class="msgs" id="msgs">${c.msgs.length?c.msgs.map(m=>`<div class="msg ${m.from}">${esc(m.text)}<small>${m.time}</small></div>`).join(""):'<div class="empty">Say hi 👋</div>'}</div>
+  <div class="msgs" id="msgs">${c.msgs.length?c.msgs.map(m=>`<div class="msg ${m.from}">${esc(m.text)}<small>${m.time}</small></div>`).join(""):'<div class="empty">Say hi!</div>'}</div>
   <div class="typing" id="typing"></div>
   <div class="quick"><span>Are you free this weekend?</span><span>Can we discuss the idea?</span><span>What's your rate?</span></div>
   <div class="compose"><input id="msgIn" placeholder="Type a message…" onkeydown="if(event.key==='Enter')send()"><button class="btn" onclick="send()">Send ➤</button></div>`;
   $("chat").querySelectorAll(".quick span").forEach(q=>q.onclick=()=>{$("msgIn").value=q.textContent;send()});const m=$("msgs");m.scrollTop=m.scrollHeight}
 const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-const REPLIES=["Sure! Let's catch up after class 🙂","Yes, I'm free on the weekend.","Sounds interesting – tell me more about the idea!","Happy to help. Shall we meet in the library?","Great, I'll share my portfolio here."];
+const REPLIES=["Sure! Let's catch up after class.","Yes, I'm free on the weekend.","Sounds interesting – tell me more about the idea!","Happy to help. Shall we meet in the library?","Great, I'll share my portfolio here."];
 function send(){const i=$("msgIn"),t=i.value.trim();if(!t)return;const k=current;addMsg(k,"me",t);i.value="";$("msgIn").focus();
   setTimeout(()=>{if(current===k&&$("typing"))$("typing").textContent=who(k).name.split(" ")[0]+" is typing…"},400);
   setTimeout(()=>{addMsg(k,"them",REPLIES[Math.floor(Math.random()*REPLIES.length)]);if($("typing"))$("typing").textContent=""},1700)}
-ensureConvo("s3");convos["s3"].msgs.push({from:"them",text:"Hey! Saw you're forming a team for CampusHack – I'd love to join 🙌",time:"10:12"});convos["s3"].unread=1;
+ensureConvo("s3");convos["s3"].msgs.push({from:"them",text:"Hey! Saw you're forming a team for CampusHack – I'd love to join.",time:"10:12"});convos["s3"].unread=1;
 
 
 /* ================= AI dream team ================= */
 let dream=[],dreamInvited=false;
 function buildDream(regen){const m=me();const base={skills:m.skills,interests:m.interests,slots:m.slots};let pool=students.filter(s=>!myTeam.includes(s));const team=[base,...myTeam];const picks=[];
   while(team.length<6&&pool.length){const ranked=pool.map(c=>({c,s:parts(team,c).total})).sort((a,b)=>b.s-a.s);const k=regen?Math.min(3,ranked.length):1;const pick=ranked[Math.floor(Math.random()*k)].c;team.push(pick);picks.push(pick);pool=pool.filter(x=>x!==pick)}
-  dream=picks;dreamInvited=false;$("inviteAllBtn").disabled=false;$("inviteAllBtn").textContent=`Invite all ${picks.length}`;renderDream(team);if(regen)toast("✦ New dream team generated")}
+  dream=picks;dreamInvited=false;$("inviteAllBtn").disabled=false;$("inviteAllBtn").textContent=`Invite all ${picks.length}`;renderDream(team);if(regen)toast("New dream team generated")}
 function renderDream(team){const all=team||[{skills:me().skills,interests:me().interests,slots:me().slots},...myTeam,...dream];
   const cover=ROLES.map(r=>({r,n:all.filter(x=>x.skills.has(r)).length}));const covPct=cover.filter(c=>c.n>0).length/ROLES.length;
   const others=all.slice(1);const intr=others.length?mean(others.map(c=>jac(c.interests,all[0].interests))):0;const avail=others.length?mean(others.map(c=>jac(c.slots,all[0].slots))):0;const rate=others.length?mean(others.map(c=>c.rating))/5:0;
@@ -612,11 +621,11 @@ function renderDream(team){const all=team||[{skills:me().skills,interests:me().i
   $("dreamWhy").innerHTML=[["Role coverage (55%)",covPct],["Shared interests (15%)",intr],["Common free days (15%)",avail],["Avg. rating (15%)",rate]].map(([l,v])=>`<span>${l}<div class="bar" style="margin-top:6px"><i style="width:${Math.round(v*100)}%"></i></div></span><b style="text-align:right">${Math.round(v*100)}%</b>`).join("")}
 function animateNum(el,to){let v=0;clearInterval(el._i);el._i=setInterval(()=>{v=Math.min(to,v+3);el.textContent=v;if(v>=to)clearInterval(el._i)},18)}
 function inviteAll(){if(dreamInvited)return;dreamInvited=true;const b=$("inviteAllBtn");b.disabled=true;b.textContent="Invites sent…";
-  dream.forEach((s,i)=>{ensureConvo("s"+s.id);addMsg("s"+s.id,"me",`Hi ${s.name.split(" ")[0]}! Want to join our CampusHack dream team? 🚀`)});
-  setTimeout(()=>{dream.forEach(s=>{if(!myTeam.includes(s)&&myTeam.length<5)myTeam.push(s);addMsg("s"+s.id,"them","I'm in! Let's build something cool 🙌")});dream=[];renderTeam();renderDream();b.textContent="✓ Everyone joined";confetti();toast("🎉 Your dream team is complete!")},1600)}
-function groupChat(){const key="g1";if(!convos[key]){ensureConvo(key);convos[key].msgs.push({from:"them",text:"Team chat created – say hi to your crew! 👋",time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})})}openChat(key)}
+  dream.forEach((s,i)=>{ensureConvo("s"+s.id);addMsg("s"+s.id,"me",`Hi ${s.name.split(" ")[0]}! Want to join our CampusHack dream team?`)});
+  setTimeout(()=>{dream.forEach(s=>{if(!myTeam.includes(s)&&myTeam.length<5)myTeam.push(s);addMsg("s"+s.id,"them","I'm in! Let's build something cool.")});dream=[];renderTeam();renderDream();b.textContent="Everyone joined";confetti();toast("Your dream team is complete!")},1600)}
+function groupChat(){const key="g1";if(!convos[key]){ensureConvo(key);convos[key].msgs.push({from:"them",text:"Team chat created – say hi to your crew!",time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})})}openChat(key)}
 
-renderHome();countUp();renderTeam();renderCats();renderSvcs();renderConvos();findMates(false);renderProfile();
+renderHome();countUp();renderTeam();renderCats();loadSvcs();renderConvos();findMates(false);renderProfile();
 
 /* URL params for quick demo / screenshots: ?page=dream  &demo=invite|chat|auto */
 (function(){const q=new URLSearchParams(location.search),pg=q.get("page"),d=q.get("demo");if(pg)go(pg);

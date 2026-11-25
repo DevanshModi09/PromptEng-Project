@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  campuscrew:
+    build: .
+    container_name: campuscrew
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - campuscrew_data:/data
+
+volumes:
+  campuscrew_data:
