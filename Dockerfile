@@ -10,8 +10,10 @@
 # ── Stage 1: install backend dependencies ────────────────────
 FROM node:20-alpine AS backend-deps
 WORKDIR /app/backend
+# better-sqlite3 needs native build tools
+RUN apk add --no-cache python3 make g++
 COPY backend/package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # ── Stage 2: final runtime image ─────────────────────────────
 FROM node:20-alpine
