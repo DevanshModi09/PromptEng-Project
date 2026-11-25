@@ -89,6 +89,31 @@ elif command -v iptables &>/dev/null; then
   sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null || true
 fi
 
+# ── Update host nginx to proxy HTTPS → Docker container ──────
+info "Updating host nginx to proxy https → Docker on port 3000..."
+sudo tee /etc/nginx/sites-enabled/default > /dev/null <<'NGINX'
+server {
+    listen 80;
+    location /.well-known/acme-challenge/ { root /var/www/html; }
+    location / { return 301 https://$host$request_uri; }
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate     /etc/letsencrypt/live/15.252.73.105/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/15.252.73.105/privkey.pem;
+
+    location / {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+    }
+}
+NGINX
+sudo nginx -t && sudo systemctl reload nginx || warn "nginx reload failed – check sudo nginx -t"
+
 # ── Remove any old CampusCrew container / image ──────────────
 info "Cleaning up old deployment (if any)..."
 docker compose down --remove-orphans 2>/dev/null || true
@@ -119,8 +144,8 @@ PUBLIC_IP=$(curl -s --max-time 3 http://169.254.169.254/latest/meta-data/public-
 echo ""
 echo -e "${GREEN}=====================================================${NC}"
 echo -e "${GREEN}  CampusCrew is live!${NC}"
-echo -e "${GREEN}  Frontend : http://${PUBLIC_IP}${NC}"
-echo -e "${GREEN}  API      : http://${PUBLIC_IP}/api/services${NC}"
+echo -e "${GREEN}  Frontend : https://${PUBLIC_IP}${NC}"
+echo -e "${GREEN}  API      : https://${PUBLIC_IP}/api/services${NC}"
 echo -e "${GREEN}=====================================================${NC}"
 echo ""
 echo "  Useful commands:"
