@@ -89,19 +89,23 @@ elif command -v iptables &>/dev/null; then
   sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null || true
 fi
 
-# ── Update host nginx to proxy HTTPS → Docker container ──────
-info "Updating host nginx to proxy https → Docker on port 3000..."
+# ── Install nginx if not present ─────────────────────────────
+if ! command -v nginx &>/dev/null; then
+  info "Installing nginx..."
+  if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+    sudo apt-get install -y -qq nginx
+  elif [[ "$OS_ID" == "amzn" ]]; then
+    sudo yum install -y nginx || sudo dnf install -y nginx
+  fi
+  sudo systemctl enable nginx
+fi
+
+# ── Configure nginx to proxy HTTP → Docker on port 3000 ──────
+info "Configuring nginx..."
 sudo tee /etc/nginx/sites-enabled/default > /dev/null <<'NGINX'
 server {
     listen 80;
-    location /.well-known/acme-challenge/ { root /var/www/html; }
-    location / { return 301 https://$host$request_uri; }
-}
-
-server {
-    listen 443 ssl;
-    ssl_certificate     /etc/letsencrypt/live/15.252.73.105/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/15.252.73.105/privkey.pem;
+    server_name _;
 
     location / {
         proxy_pass         http://127.0.0.1:3000;
@@ -112,7 +116,7 @@ server {
     }
 }
 NGINX
-sudo nginx -t && sudo systemctl reload nginx || warn "nginx reload failed – check sudo nginx -t"
+sudo nginx -t && sudo systemctl reload nginx || sudo systemctl start nginx
 
 # ── Remove any old CampusCrew container / image ──────────────
 info "Cleaning up old deployment (if any)..."
@@ -130,7 +134,7 @@ docker compose up -d
 # ── Health check ──────────────────────────────────────────────
 info "Waiting for health check..."
 ATTEMPTS=0
-until docker compose exec campuscrew wget -qO- http://localhost/api/health &>/dev/null; do
+until curl -sf http://localhost/api/health &>/dev/null; do
   ATTEMPTS=$((ATTEMPTS+1))
   [[ $ATTEMPTS -ge 20 ]] && fatal "Health check failed after 20 attempts. Run: docker logs campuscrew"
   sleep 3
@@ -144,8 +148,8 @@ PUBLIC_IP=$(curl -s --max-time 3 http://169.254.169.254/latest/meta-data/public-
 echo ""
 echo -e "${GREEN}=====================================================${NC}"
 echo -e "${GREEN}  CampusCrew is live!${NC}"
-echo -e "${GREEN}  Frontend : https://${PUBLIC_IP}${NC}"
-echo -e "${GREEN}  API      : https://${PUBLIC_IP}/api/services${NC}"
+echo -e "${GREEN}  Frontend : http://${PUBLIC_IP}${NC}"
+echo -e "${GREEN}  API      : http://${PUBLIC_IP}/api/services${NC}"
 echo -e "${GREEN}=====================================================${NC}"
 echo ""
 echo "  Useful commands:"
