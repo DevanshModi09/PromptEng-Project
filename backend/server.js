@@ -49,7 +49,11 @@ if (count.n === 0) {
 
 // ── Serve frontend ────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "campuscrew_demo.html"));
+  // Works both when run from repo root (Docker) and from backend/ dir (Render native)
+  const htmlPath = path.join(__dirname, "..", "campuscrew_demo.html");
+  const fallback = path.join(__dirname, "campuscrew_demo.html");
+  const fs = require("fs");
+  res.sendFile(fs.existsSync(htmlPath) ? htmlPath : fallback);
 });
 
 // ── Routes ────────────────────────────────────────────────────────────────────
