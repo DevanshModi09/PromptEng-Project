@@ -191,7 +191,7 @@ docker compose up -d
 # ── Health check ──────────────────────────────────────────────
 info "Waiting for health check..."
 ATTEMPTS=0
-until curl -sf http://localhost/api/health &>/dev/null; do
+until curl -sf http://localhost:3000/api/health &>/dev/null; do
   ATTEMPTS=$((ATTEMPTS+1))
   [[ $ATTEMPTS -ge 20 ]] && fatal "Health check failed after 20 attempts. Run: docker logs campuscrew"
   sleep 3
