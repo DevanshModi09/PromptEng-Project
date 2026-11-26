@@ -1,46 +1,25 @@
-# CampusCrew – Full-stack Docker image
-# Frontend: nginx serving campuscrew_demo.html as /
-# Backend:  Node.js (Express + SQLite) on internal port 3001
-# nginx reverse-proxies /api/* to the backend
-#
-# Build:  docker build -t campuscrew .
-# Run:    docker run -d -p 80:80 -v campuscrew_data:/data --name campuscrew campuscrew
-# Logs:   docker logs -f campuscrew
+# CampusCrew – single Node.js container for Render
+# Express serves the frontend HTML + all /api/* routes
+# No nginx, no supervisord
 
-# ── Stage 1: install backend dependencies ────────────────────
-FROM node:20-alpine AS backend-deps
-WORKDIR /app/backend
-# better-sqlite3 needs native build tools
-RUN apk add --no-cache python3 make g++
-COPY backend/package*.json ./
-RUN npm install --omit=dev
-
-# ── Stage 2: final runtime image ─────────────────────────────
 FROM node:20-alpine
 
-# nginx and supervisor (runs both nginx and node in one container)
-RUN apk add --no-cache nginx supervisor
+# better-sqlite3 needs native build tools
+RUN apk add --no-cache python3 make g++
 
-# ── Backend ───────────────────────────────────────────────────
-WORKDIR /app/backend
-COPY --from=backend-deps /app/backend/node_modules ./node_modules
-COPY backend/ ./
-# /data is a named volume; SQLite DB lives here for persistence
-RUN mkdir -p /data
+WORKDIR /app
 
-# ── Frontend ──────────────────────────────────────────────────
-RUN mkdir -p /var/www/campuscrew
-COPY campuscrew_demo.html /var/www/campuscrew/index.html
+# Install backend dependencies
+COPY backend/package*.json ./backend/
+RUN cd backend && npm install --omit=dev
 
-# ── nginx config ──────────────────────────────────────────────
-RUN rm -f /etc/nginx/conf.d/default.conf
-COPY docker/nginx.conf /etc/nginx/conf.d/campuscrew.conf
+# Copy app files
+COPY backend/ ./backend/
+COPY campuscrew_demo.html ./campuscrew_demo.html
 
-# ── supervisor config ─────────────────────────────────────────
-COPY docker/supervisord.conf /etc/supervisord.conf
+# Render injects PORT automatically; fallback to 3001 for local dev
+ENV NODE_ENV=production
 
-EXPOSE 80
+EXPOSE 3001
 
-VOLUME ["/data"]
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["node", "backend/server.js"]

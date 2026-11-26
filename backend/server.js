@@ -4,7 +4,6 @@ const cors = require("cors");
 const path = require("path");
 
 const app = express();
-// In Docker the /data volume is mounted for persistence; fall back to local file in dev
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "campuscrew.db");
 const db = new Database(DB_PATH);
 
@@ -48,6 +47,11 @@ if (count.n === 0) {
   console.log("Seeded default services.");
 }
 
+// ── Serve frontend ────────────────────────────────────────────────────────────
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "campuscrew_demo.html"));
+});
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 
 // GET all services
@@ -79,4 +83,4 @@ app.delete("/api/services/:key", (req, res) => {
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`CampusCrew API running on port ${PORT}`));
+app.listen(PORT, () => console.log(`CampusCrew running on port ${PORT}`));
