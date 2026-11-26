@@ -100,23 +100,80 @@ if ! command -v nginx &>/dev/null; then
   sudo systemctl enable nginx
 fi
 
-# ── Configure nginx to proxy HTTP → Docker on port 3000 ──────
+# ── Configure nginx (HTTP first, HTTPS after cert) ───────────
 info "Configuring nginx..."
-sudo tee /etc/nginx/sites-enabled/default > /dev/null <<'NGINX'
+sudo tee /etc/nginx/sites-enabled/default > /dev/null <<NGINX
 server {
     listen 80;
     server_name _;
 
+    # Needed for certbot webroot challenge
+    location /.well-known/acme-challenge/ { root /var/www/html; }
+
     location / {
         proxy_pass         http://127.0.0.1:3000;
         proxy_http_version 1.1;
-        proxy_set_header   Host              $host;
-        proxy_set_header   X-Real-IP         $remote_addr;
-        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   Host              \$host;
+        proxy_set_header   X-Real-IP         \$remote_addr;
+        proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
     }
 }
 NGINX
+sudo mkdir -p /var/www/html
 sudo nginx -t && sudo systemctl reload nginx || sudo systemctl start nginx
+
+# ── Certbot HTTPS on raw IP ───────────────────────────────────
+PUBLIC_IP=$(curl -s --max-time 3 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null \
+            || curl -s --max-time 3 https://checkip.amazonaws.com 2>/dev/null \
+            || hostname -I | awk '{print $1}')
+
+CERT_PATH="/etc/letsencrypt/live/${PUBLIC_IP}/fullchain.pem"
+
+if [[ ! -f "$CERT_PATH" ]]; then
+  info "Installing certbot and getting SSL cert for ${PUBLIC_IP}..."
+  sudo snap install --classic certbot 2>/dev/null || true
+  sudo ln -sf /snap/bin/certbot /usr/local/bin/certbot 2>/dev/null || true
+
+  sudo certbot certonly \
+    --preferred-profile shortlived \
+    --webroot --webroot-path /var/www/html \
+    --ip-address "${PUBLIC_IP}" \
+    --non-interactive --agree-tos --register-unsafely-without-email \
+    && info "SSL cert obtained!" || warn "Certbot failed – continuing with HTTP only."
+else
+  info "SSL cert already exists for ${PUBLIC_IP}, skipping certbot."
+fi
+
+# ── Update nginx with HTTPS if cert exists ────────────────────
+if [[ -f "$CERT_PATH" ]]; then
+  info "Enabling HTTPS in nginx..."
+  sudo tee /etc/nginx/sites-enabled/default > /dev/null <<NGINX
+server {
+    listen 80;
+    location /.well-known/acme-challenge/ { root /var/www/html; }
+    location / { return 301 https://\$host\$request_uri; }
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate     /etc/letsencrypt/live/${PUBLIC_IP}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${PUBLIC_IP}/privkey.pem;
+
+    location / {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              \$host;
+        proxy_set_header   X-Real-IP         \$remote_addr;
+        proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
+    }
+}
+NGINX
+  # Auto-renew hook so nginx reloads after cert renewal
+  echo '#!/bin/sh
+systemctl reload nginx' | sudo tee /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+  sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+  sudo nginx -t && sudo systemctl reload nginx
+fi
 
 # ── Remove any old CampusCrew container / image ──────────────
 info "Cleaning up old deployment (if any)..."
@@ -141,15 +198,14 @@ until curl -sf http://localhost/api/health &>/dev/null; do
 done
 
 # ── Print URL ─────────────────────────────────────────────────
-PUBLIC_IP=$(curl -s --max-time 3 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null \
-            || curl -s --max-time 3 https://checkip.amazonaws.com 2>/dev/null \
-            || hostname -I | awk '{print $1}')
+PROTO="http"
+[[ -f "$CERT_PATH" ]] && PROTO="https"
 
 echo ""
 echo -e "${GREEN}=====================================================${NC}"
 echo -e "${GREEN}  CampusCrew is live!${NC}"
-echo -e "${GREEN}  Frontend : http://${PUBLIC_IP}${NC}"
-echo -e "${GREEN}  API      : http://${PUBLIC_IP}/api/services${NC}"
+echo -e "${GREEN}  Frontend : ${PROTO}://${PUBLIC_IP}${NC}"
+echo -e "${GREEN}  API      : ${PROTO}://${PUBLIC_IP}/api/services${NC}"
 echo -e "${GREEN}=====================================================${NC}"
 echo ""
 echo "  Useful commands:"
